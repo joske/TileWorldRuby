@@ -1,5 +1,3 @@
-require './objects.rb'
-    
 class Grid
     
     def initialize(numAgents, numHoles, numTiles, numObstacles)

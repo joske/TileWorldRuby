@@ -2,6 +2,8 @@
 
 require './grid.rb'
 require './gridview.rb'
+require './objects.rb'
+
 
 ROWS=50
 COLS=50
