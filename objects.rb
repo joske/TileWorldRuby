@@ -122,7 +122,8 @@ class Agent < GridObject
         return unless @hole != nil
         if @hole.col == @col && @hole.row == row
             # we have arrived
-            dumpTile            
+            dumpTile         
+            return   
         end
         best_dir = findBestMove(@hole.col, @hole.row)
         if best_dir != 0
@@ -132,6 +133,7 @@ class Agent < GridObject
 
     def dumpTile
         @tile = nil
+        @hasTile = false
         @grid.removeHole(@hole)
         @hole = nil
         @state = State::IDLE
