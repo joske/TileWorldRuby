@@ -14,7 +14,7 @@ class TileWorld < Gtk::Application
             window.add frame
 
             view = Gtk::DrawingArea.new
-            view.set_size_request COLS*MAG + 200, ROWS*MAG
+            view.set_size_request COLS*MAG + 250, ROWS*MAG
             frame.add(view)
 
             view.signal_connect "draw" do |_da, cr|
@@ -32,7 +32,7 @@ class TileWorld < Gtk::Application
                 true
             end
 
-            GLib::Timeout.add(500) {
+            GLib::Timeout.add(200) {
                 @grid.update
                 rect = Gdk::Rectangle.new(0, 0, view.allocation.width, view.allocation.height)
                 window.window.invalidate_rect(rect, false)
@@ -48,9 +48,10 @@ class TileWorld < Gtk::Application
         cr.set_source_rgb(1, 1, 1)
         cr.paint
         cr.set_line_width(2)
-        for r in 1..ROWS
+        cr.rectangle(0, 0, COLS*MAG, ROWS*MAG)
+        for r in 0..(ROWS - 1)
             puts
-            for c in 1..COLS
+            for c in 0..(COLS - 1)
                 cr.set_source_rgb(0, 0, 0)
                 o = objects[[c,r]]
                 if o != nil
@@ -85,7 +86,9 @@ class TileWorld < Gtk::Application
             r, b, g = getColor(a.num)       
             cr.set_source_rgb(r, g, b)
             id = a.num
-            draw_text cr, x, y + id * MAG, "Agent(#{id}) : #{a.score}"
+            text = "Agent(#{id}): #{a.score}"
+            draw_text cr, x, y + id * MAG, text
+            puts text
         }
     end
     

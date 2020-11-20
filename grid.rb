@@ -15,36 +15,36 @@ class Grid
         @objects = Hash.new # store as hash, with key the array [col, row] -- Ruby has no 2d array
         # create agents
         for a in 0..(numAgents - 1)
-            col = rand(1..COLS)
-            row = rand(1..ROWS)
+            col = rand(0..COLS - 1)
+            row = rand(0..ROWS - 1)
             agent = Agent.new(self, a, col, row)
             
         end
         for a in 0..(numHoles - 1)
-            col = rand(1..COLS)
-            row = rand(1..ROWS)
+            col = rand(0..COLS - 1)
+            row = rand(0..ROWS - 1)
             while @objects[[col,row]] != nil
-                col = rand(1..COLS)
-                row = rand(1..ROWS)
+                col = rand(0..COLS - 1)
+                row = rand(0..ROWS - 1)
             end
             hole = Hole.new(self, a, col, row)
         end
         for a in 0..(numTiles - 1)
-            col = rand(1..COLS)
-            row = rand(1..ROWS)
+            col = rand(0..COLS - 1)
+            row = rand(0..ROWS - 1)
             score = rand(1..5)
             while @objects[[col,row]] != nil
-                col = rand(1..COLS)
-                row = rand(1..ROWS)
+                col = rand(0..COLS - 1)
+                row = rand(0..ROWS - 1)
             end
             tile = Tile.new(self, a, col, row, score)
         end
         for a in 0..(numObstacles - 1)
-            col = rand(1..COLS)
-            row = rand(1..ROWS)
+            col = rand(0..COLS - 1)
+            row = rand(0..ROWS - 1)
             while @objects[[col,row]] != nil
-                col = rand(1..COLS)
-                row = rand(1..ROWS)
+                col = rand(0..COLS - 1)
+                row = rand(0..ROWS - 1)
             end
             obst = Obstacle.new(self, a, col, row)
         end
