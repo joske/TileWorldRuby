@@ -31,7 +31,7 @@ class TileWorld < Gtk::Application
                 true
             end
 
-            GLib::Timeout.add(200) {
+            GLib::Timeout.add(100) {
                 @grid.update
                 rect = Gdk::Rectangle.new(0, 0, view.allocation.width, view.allocation.height)
                 window.window.invalidate_rect(rect, false)

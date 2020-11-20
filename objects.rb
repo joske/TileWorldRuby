@@ -99,6 +99,11 @@ class Agent < GridObject
     end
 
     def findBestMove(col, row)
+        r = rand(1..10)
+        if (r > 3) 
+            # 20 % chance to pick a random move to get out of local minima
+            return rand(1..4)
+        end
         min_dist = 100000
         best_dir = 0
         for dir in 1..4
