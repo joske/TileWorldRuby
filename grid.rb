@@ -234,15 +234,18 @@ module TileWorld
                     true
                 end
     
-                Thread.new {
-                    while true
-                        @grid.update
-                        rect = Gdk::Rectangle.new(0, 0, view.allocation.width, view.allocation.height)
-                        window.window.invalidate_rect(rect, false)
-                        redraw(view, surface, @grid.objects)
-                        sleep(0.5)
-                    end
-                }    
+                GLib::Timeout.add(100) {
+                    @grid.update
+                    rect = Gdk::Rectangle.new(0, 0, view.allocation.width, view.allocation.height)
+                    window.window.invalidate_rect(rect, false)
+                    redraw(view, surface, @grid.objects)
+                    true
+                }
+                # Thread.new {
+                #     while true
+                #         sleep(0.5)
+                #     end
+                # }    
                 window.show_all     
             end             
         end
@@ -333,6 +336,6 @@ module TileWorld
 
 end
 
-grid = TileWorld::Grid.new(2, 5, 5, 5)
+grid = TileWorld::Grid.new(6, 20, 20, 20)
 app = TileWorld::TileWorld.new(grid)
 app.run
