@@ -1,3 +1,4 @@
+require 'gtk3'
 class TileWorld < Gtk::Application
     def initialize(grid)
         @grid = grid
@@ -27,8 +28,6 @@ class TileWorld < Gtk::Application
                 surface = window.window.create_similar_surface(Cairo::CONTENT_COLOR,
                                                             da.allocated_width,
                                                             da.allocated_height)
-                # the configure event have been handled, no need for further
-                # processing
                 true
             end
 

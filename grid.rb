@@ -1,4 +1,3 @@
-require 'gtk3'
 require './objects.rb'
     
 class Grid
