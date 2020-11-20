@@ -1,3 +1,11 @@
+
+module Direction
+    UP = 1
+    DOWN = 2
+    LEFT = 3
+    RIGHT = 4
+end
+
 class Grid
     
     def initialize(numAgents, numHoles, numTiles, numObstacles)
@@ -12,37 +20,21 @@ class Grid
         @objects = Hash.new # store as hash, with key the array [col, row] -- Ruby has no 2d array
         # create agents
         for a in 0..(numAgents - 1)
-            col = rand(0..COLS - 1)
-            row = rand(0..ROWS - 1)
+            col, row = randomFreeLocation
             agent = Agent.new(self, a, col, row)
             
         end
         for a in 0..(numHoles - 1)
-            col = rand(0..COLS - 1)
-            row = rand(0..ROWS - 1)
-            while @objects[[col,row]] != nil
-                col = rand(0..COLS - 1)
-                row = rand(0..ROWS - 1)
-            end
+            col, row = randomFreeLocation
             hole = Hole.new(self, a, col, row)
         end
         for a in 0..(numTiles - 1)
-            col = rand(0..COLS - 1)
-            row = rand(0..ROWS - 1)
-            score = rand(1..5)
-            while @objects[[col,row]] != nil
-                col = rand(0..COLS - 1)
-                row = rand(0..ROWS - 1)
-            end
+            score = rand(1..6)
+            col, row = randomFreeLocation
             tile = Tile.new(self, a, col, row, score)
         end
         for a in 0..(numObstacles - 1)
-            col = rand(0..COLS - 1)
-            row = rand(0..ROWS - 1)
-            while @objects[[col,row]] != nil
-                col = rand(0..COLS - 1)
-                row = rand(0..ROWS - 1)
-            end
+            col, row = randomFreeLocation
             obst = Obstacle.new(self, a, col, row)
         end
     end
@@ -67,11 +59,90 @@ class Grid
         @obstacles
     end
 
+    def removeTile(tile)
+        @tiles.delete(tile)
+        @objects[[tile.col, tile.row]] = nil
+    end
+
+    def removeHole(hole)
+        @holes.delete(hole)
+        @objects[[hole.col, hole.row]] = nil
+    end
+
+    def nextLocation(oldCol, oldRow, dir)
+        if (dir == Direction::UP)
+            return oldCol, oldRow - 1
+        elsif (dir == Direction::DOWN)
+            return oldCol, oldRow + 1
+        elsif (dir == Direction::LEFT)
+            return oldCol - 1, oldRow
+        else
+            return oldCol + 1, oldRow
+        end        
+    end
+    
+    def allowedLocation(col, row)
+        @objects[[col, row]] == nil
+    end
+    
+    def validMove(col, row, dir)
+        if (dir == Direction::UP)
+            return row > 1 && allowedLocation(col, row - 1)
+        elsif (dir == Direction::DOWN)
+            return row < ROWS && allowedLocation(col, row + 1)
+        elsif (dir == Direction::LEFT)
+            return col > 1 && allowedLocation(col - 1, row)
+        else
+            return col < COLS && allowedLocation(col + 1, row)
+        end        
+    
+    end 
+    
+    def randomFreeLocation
+        col = rand(0..COLS - 1)
+        row = rand(0..ROWS - 1)
+        while @objects[[col,row]] != nil
+            col = rand(0..COLS - 1)
+            row = rand(0..ROWS - 1)
+        end
+        return col, row
+    end
+
+    def distance(col1, row1, col2, row2)
+        return (col1 - col2).abs + (row1 - row2).abs
+    end
+
+    def getClosestTile(col, row)
+        closest = 1000000
+        best = nil
+        @tiles.each {|t|
+            dist = distance(col, row, t.col, t.row)
+            if dist < closest
+                closest = dist
+                best = t
+            end 
+        }
+        return best
+    end
+
+    def getClosestHole(col, row)
+        closest = 1000000
+        best = nil
+        @holes.each {|h|
+            dist = distance(col, row, h.col, h.row)
+            if dist < closest
+                closest = dist
+                best = h
+            end 
+        }
+        return best
+    end
+
     def update
         @agents.each() { |a|
             puts a
             origRow, origCol = a.location
-            a.nextMove
+            a.update
             puts a
             newRow, newCol = a.location
             @objects[[origCol,origRow]] = nil

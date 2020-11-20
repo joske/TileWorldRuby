@@ -1,34 +1,8 @@
-module Direction
-    UP = 1
-    DOWN = 2
-    LEFT = 3
-    RIGHT = 4
+module State
+    IDLE=0
+    MOVE_TO_TILE=1
+    MOVE_TO_HOLE=2
 end
-
-def nextLocation(oldCol, oldRow, dir)
-    if (dir == Direction::UP)
-        return oldCol, oldRow - 1
-    elsif (dir == Direction::DOWN)
-        return oldCol, oldRow + 1
-    elsif (dir == Direction::LEFT)
-        return oldCol - 1, oldRow
-    else
-        return oldCol + 1, oldRow
-    end        
-end
-
-def validMove(col, row, dir)
-    if (dir == Direction::UP)
-        return row > 1 && @grid.objects[[col, row - 1]] == nil
-    elsif (dir == Direction::DOWN)
-        return row < ROWS && @grid.objects[[col, row + 1]] == nil
-    elsif (dir == Direction::LEFT)
-        return col > 1 && @grid.objects[[col - 1, row]] == nil
-    else
-        return col < COLS && @grid.objects[[col + 1, row]] == nil
-    end        
-
-end 
 
 class GridObject
     def initialize(grid, num, col, row)
@@ -41,15 +15,23 @@ class GridObject
     def num
         @num
     end
+    def col
+        @col
+    end
+    def row
+        @row
+    end
 end
         
-class Agent < GridObject
-    @tile = nil
-    @score = 0
-
+class Agent < GridObject    
     def initialize(grid, num, col, row)
         super grid, num, col, row
         grid.agents[num] = self
+        @state = State::IDLE
+        @tile = nil
+        @hole = nil
+        @score = 0
+        @hasTile = false    
     end
     def set_score score
         @score = score
@@ -60,13 +42,9 @@ class Agent < GridObject
     end
 
     # updates the location of this agent
-    def nextMove()
-        dir = rand(1..4) #random walk for now
-        while !validMove(@col, @row, dir)
-            dir = rand(1..4) #random walk for now
-        end
+    def nextMove(dir)
         puts "move #{dir}"
-        @col, @row = nextLocation(@col, @row, dir)
+        @col, @row = @grid.nextLocation(@col, @row, dir)
     end
     
     def location() 
@@ -74,7 +52,7 @@ class Agent < GridObject
     end
 
     def hasTile
-        return @tile != nil
+        @hasTile
     end
 
     def set_tile(tile)
@@ -85,8 +63,82 @@ class Agent < GridObject
         @tile
     end
 
+    def update
+        if @state == State::IDLE
+            idle
+        elsif @state == State::MOVE_TO_TILE
+            moveToTile
+        else
+            moveToHole
+        end
+    end
+
+    def idle
+        puts "#{self} finding tile"
+        @tile = @grid.getClosestTile(@col, @row)
+        puts "#{self} found tile #{@tile}"
+        @state = State::MOVE_TO_TILE
+    end
+
+    def moveToTile
+        if @tile.col == @col && @tile.row == row
+            # we have arrived
+            pickTile
+            @hole = @grid.getClosestHole(@col, @row)
+            @state = State::MOVE_TO_HOLE
+        end
+        best_dir = findBestMove(@tile.col, @tile.row)
+        if best_dir != 0
+            nextMove(best_dir)
+        end
+    end
+
+    def pickTile
+        @hasTile = true
+        @grid.removeTile(@tile)
+    end
+
+    def findBestMove(col, row)
+        min_dist = 100000
+        best_dir = 0
+        for dir in 1..4
+            newCol, newRow = @grid.nextLocation(@col, @row, dir)
+            if newCol == col && newRow == row
+                #arrived
+                return dir
+            end
+            if @grid.allowedLocation(newCol, newRow)
+                dist = @grid.distance(col, row, newCol, newRow)
+                if dist < min_dist
+                    min_dist = dist
+                    best_dir = dir
+                end
+            end
+        end
+        return best_dir
+    end
+
+    def moveToHole
+        return unless @hole != nil
+        if @hole.col == @col && @hole.row == row
+            # we have arrived
+            dumpTile            
+        end
+        best_dir = findBestMove(@hole.col, @hole.row)
+        if best_dir != 0
+            nextMove(best_dir)
+        end
+    end
+
+    def dumpTile
+        @tile = nil
+        @grid.removeHole(@hole)
+        @hole = nil
+        @state = State::IDLE
+    end
+
     def to_s
-        return "agent #{@num} at col=#{@col}, row=#{@row}"
+        return "agent #{@num} at col=#{@col}, row=#{@row} in state #{@state}"
     end
 end
 
