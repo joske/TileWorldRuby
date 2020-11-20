@@ -79,10 +79,9 @@ class TileWorld < Gtk::Application
       end
     end
     puts
-    agents = @grid.agents
     x = COLS * MAG + 50
     y = 20
-    agents.each { |a|
+    @grid.agents.each { |a|
       r, b, g = getColor(a.num)
       cr.set_source_rgb(r, g, b)
       id = a.num

@@ -140,6 +140,7 @@ class Agent < GridObject
   end
 
   def dumpTile
+    @score += @tile.score
     @tile = nil
     @hasTile = false
     @grid.removeHole(@hole)
