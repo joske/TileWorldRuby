@@ -119,7 +119,6 @@ class Agent < GridObject
     end
 
     def moveToHole
-        return unless @hole != nil
         if @hole.col == @col && @hole.row == row
             # we have arrived
             dumpTile         

@@ -14,8 +14,8 @@ class Grid
         @numTiles = numTiles
         
         @agents = []
-        @holes = []
-        @tiles = []
+        @holes = Hash.new
+        @tiles = Hash.new
         @obstacles = []
         @objects = Hash.new # store as hash, with key the array [col, row] -- Ruby has no 2d array
         # create agents
@@ -25,13 +25,10 @@ class Grid
             
         end
         for a in 0..(numHoles - 1)
-            col, row = randomFreeLocation
-            hole = Hole.new(self, a, col, row)
+            createHole(a)
         end
         for a in 0..(numTiles - 1)
-            score = rand(1..6)
-            col, row = randomFreeLocation
-            tile = Tile.new(self, a, col, row, score)
+            createTile(a)
         end
         for a in 0..(numObstacles - 1)
             col, row = randomFreeLocation
@@ -59,14 +56,29 @@ class Grid
         @obstacles
     end
 
+    def createTile(a)
+        score = rand(1..6)
+        col, row = randomFreeLocation
+        tile = Tile.new(self, a, col, row, score)
+        @tiles[a] = tile
+    end
+
+    def createHole(a)
+        col, row = randomFreeLocation
+        hole = Hole.new(self, a, col, row)
+        @holes[a] = hole
+    end
+
     def removeTile(tile)
-        @tiles.delete(tile)
+        @tiles.delete(tile.num)
         @objects[[tile.col, tile.row]] = nil
+        createTile(tile.num)
     end
 
     def removeHole(hole)
-        @holes.delete(hole)
+        @holes.delete(hole.num)
         @objects[[hole.col, hole.row]] = nil
+        createHole(hole.num)
     end
 
     def nextLocation(oldCol, oldRow, dir)
@@ -115,7 +127,7 @@ class Grid
     def getClosestTile(col, row)
         closest = 1000000
         best = nil
-        @tiles.each {|t|
+        @tiles.each_value {|t|
             dist = distance(col, row, t.col, t.row)
             if dist < closest
                 closest = dist
@@ -128,7 +140,7 @@ class Grid
     def getClosestHole(col, row)
         closest = 1000000
         best = nil
-        @holes.each {|h|
+        @holes.each_value {|h|
             dist = distance(col, row, h.col, h.row)
             if dist < closest
                 closest = dist
