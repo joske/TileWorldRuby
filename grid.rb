@@ -2,8 +2,8 @@
 
 require 'gtk3'
 
-ROWS=10
-COLS=10
+ROWS=50
+COLS=50
 MAG=20
 
 module Direction
@@ -48,9 +48,14 @@ module TileWorld
             @grid = grid
             grid.objects[[col, row]] = self
         end
+        def num
+            @num
+        end
     end
             
     class Agent < GridObject
+        @tile = nil
+
         def initialize(grid, num, col, row)
             super grid, num, col, row
             grid.agents[num] = self
@@ -71,7 +76,15 @@ module TileWorld
         end
 
         def hasTile
-            return true
+            return @tile != nil
+        end
+
+        def set_tile(tile)
+            @tile = tile
+        end
+
+        def tile
+            @tile
         end
 
         def to_s
@@ -87,9 +100,14 @@ module TileWorld
     end
 
     class Tile < GridObject
-        def initialize(grid, num, col, row)
+        def initialize(grid, num, col, row, score)
             super grid, num, col, row
             grid.tiles[num] = self
+            @score = score
+
+            def score
+                @score
+            end
         end
     end
     
@@ -131,11 +149,12 @@ module TileWorld
             for a in 0..(numTiles - 1)
                 col = rand(1..COLS)
                 row = rand(1..ROWS)
+                score = rand(1..5)
                 while @objects[[col,row]] != nil
                     col = rand(1..COLS)
                     row = rand(1..ROWS)
                 end
-                tile = Tile.new(self, a, col, row)
+                tile = Tile.new(self, a, col, row, score)
             end
             for a in 0..(numObstacles - 1)
                 col = rand(1..COLS)
@@ -200,6 +219,11 @@ module TileWorld
                 view.set_size_request COLS*MAG, ROWS*MAG
                 frame.add(view)
     
+                view.signal_connect "draw" do |_da, cr|
+                    cr.set_source(surface, 0, 0)
+                    cr.paint
+                    false
+                end
                 view.signal_connect "configure-event" do |da, _ev|
                     surface.destroy if surface
                     surface = window.window.create_similar_surface(Cairo::CONTENT_COLOR,
@@ -210,16 +234,11 @@ module TileWorld
                     true
                 end
     
-                # view.signal_connect "draw" do |_da, cr|
-                #     redraw(surface, @grid.objects)
-                #     false
-                # end
-
                 Thread.new {
                     while true
                         @grid.update
-                        # rect = Gdk::Rectangle.new(0, 0, view.allocation.width, view.allocation.height)
-                        # window.window.invalidate_rect(rect, false)
+                        rect = Gdk::Rectangle.new(0, 0, view.allocation.width, view.allocation.height)
+                        window.window.invalidate_rect(rect, false)
                         redraw(view, surface, @grid.objects)
                         sleep(0.5)
                     end
@@ -228,14 +247,15 @@ module TileWorld
             end             
         end
 
-        def redraw(view, surface, objects)
+        def redraw(view, surface, objects)            
             cr = Cairo::Context.new(surface)
-            cr.set_line_width(2)
             cr.set_source_rgb(1, 1, 1)
             cr.paint
+            cr.set_line_width(2)
             for r in 1..ROWS
                 puts
                 for c in 1..COLS
+                    cr.set_source_rgb(0, 0, 0)
                     o = objects[[c,r]]
                     if o != nil
                         x = c * MAG
@@ -245,39 +265,74 @@ module TileWorld
                             drawAgent(view, cr, o, x, y)
                         elsif o.instance_of? Hole
                             print 'H'
+                            cr.arc(x + MAG / 2, y + MAG / 2, MAG / 2, 0, 2 * Math::PI)
+                            cr.fill
                         elsif o.instance_of? Tile
                             print 'T'
+                            drawTile view, cr, o, x, y
                         elsif o.instance_of? Obstacle
                             print '#'
+                            cr.rectangle(x, y, MAG, MAG)
+                            cr.fill();
                         end
                     else
                         print '.'
                     end
+                    cr.stroke
                 end
             end
             puts
-            cr.destroy
         end
         
-        def drawAgent(view, cr, a, x, y)            
-            cr.set_source_rgb(0, 0, 0)
+        def drawAgent(view, cr, a, x, y)     
+            r, b, g = getColor(a.num)       
+            cr.set_source_rgb(r, g, b)
             cr.rectangle(x, y, MAG, MAG)
-            cr.fill
             if a.hasTile()
-                # cr.begin_new_sub_path()
+                cr.new_sub_path
                 cr.arc(x + MAG / 2, y + MAG / 2, MAG / 2, 0, 2 * Math::PI)
-                # cr.begin_new_sub_path()
-                #draw_text(cr, x + MAG / 4, y, to_string(agent->getTile()->getScore()).c_str());
+                cr.new_sub_path
+                draw_text(cr, x + MAG / 4, y, a.tiles.score.to_s);
             end
-            view.queue_draw_area(x, y, MAG, MAG)
         end
-    end
 
-    class GridView < Gtk::DrawingArea
+        def drawTile(view, cr, tile, x, y)     
+            cr.arc(x + MAG / 2, y + MAG / 2, MAG / 2, 0, 2 * Math::PI)
+            cr.new_sub_path
+            draw_text(cr, x + MAG / 4, y, tile.score.to_s)
+        end
+
+        def draw_text(cr, x, y, text)
+            font = Pango::FontDescription.new
+
+            font.set_family("Monospace")
+            font.set_weight(Pango::WEIGHT_BOLD)
+            layout = cr.create_pango_layout
+            layout.set_text(text)
+            layout.set_font_description(font)
+            cr.move_to(x, y);
+            cr.show_pango_layout(layout)
+        end
+
+        def getColor(num)
+            if num == 0
+                return 0, 0, 255
+            elsif num == 1
+                return 255, 0, 0
+            elsif num == 2
+                return 0, 255, 0
+            elsif num == 3
+                return 128, 128, 0
+            elsif num == 4
+                return 0, 128, 128
+            elsif num == 5
+                return 128, 0, 128
+            end
+        end
     end
 
 end
 
-grid = TileWorld::Grid.new(1, 5, 5, 5)
+grid = TileWorld::Grid.new(2, 5, 5, 5)
 app = TileWorld::TileWorld.new(grid)
 app.run
