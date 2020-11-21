@@ -103,9 +103,15 @@ class Agent < GridObject
       @state = State::MOVE_TO_HOLE
       return
     end
+    # check if our tile is still there
     if !@grid.objects[[@tile.col, @tile.row]].equal?(@tile)
       @state = State::IDLE
       return
+    end
+    # try to find a closer tile
+    potentialTile = @grid.getClosestTile(@col, @row)
+    if !potentialTile.equal?(@tile)
+      @tile = potentialTile
     end
     best_dir = findBestMove(@tile.col, @tile.row)
     if best_dir != 0
@@ -157,10 +163,16 @@ class Agent < GridObject
       dumpTile
       return
     end
+    # check if our hole is still there
     if !@grid.objects[[@hole.col, @hole.row]].equal?(@hole)
       @hole = @grid.getClosestHole(@col, @row)
       return
-  end
+    end
+    # try to find a closer hole
+    potentialHole = @grid.getClosestHole(@col, @row)
+    if !potentialHole.equal?(@hole)
+      @hole = potentialHole
+    end
     best_dir = findBestMove(@hole.col, @hole.row)
     if best_dir != 0
       nextCol, nextRow = @grid.nextLocation(@col, @row, best_dir)
