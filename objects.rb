@@ -26,7 +26,7 @@ class GridObject
   end
 
   def equal?(other)
-    return @num == other.num && @col == other.col && @row == other.row
+    return @num == other.num && @col == other.col && @row == other.row && self.class == other.class
   end
 
   def to_s
@@ -101,14 +101,15 @@ class Agent < GridObject
       pickTile
       @hole = @grid.getClosestHole(@col, @row)
       @state = State::MOVE_TO_HOLE
+      return
+    end
+    if !@grid.objects[[@tile.col, @tile.row]].equal?(@tile)
+      @state = State::IDLE
+      return
     end
     best_dir = findBestMove(@tile.col, @tile.row)
     if best_dir != 0
       nextCol, nextRow = @grid.nextLocation(@col, @row, best_dir)
-      if nextCol == @tile.col && nextRow == @tile.row && !@grid.objects[[nextCol, nextRow]].equal?(@tile)
-        @state = State::IDLE
-        return
-      end  
       nextMove(best_dir)
     end
   end
@@ -122,7 +123,7 @@ class Agent < GridObject
   def findBestMove(col, row)
     r = rand(1..100)
     if (r <= RANDOM_MOVE_PERC)
-      # 20 % chance to pick a random move to get out of local minima
+      # RANDOM_MOVE_PERC % chance to pick a random move to get out of local minima
       dir = rand(1..4)
       while ! @grid.validMove(@col, @row, dir)
         dir = rand(1..4)
@@ -156,13 +157,13 @@ class Agent < GridObject
       dumpTile
       return
     end
+    if !@grid.objects[[@hole.col, @hole.row]].equal?(@hole)
+      @hole = @grid.getClosestHole(@col, @row)
+      return
+  end
     best_dir = findBestMove(@hole.col, @hole.row)
     if best_dir != 0
       nextCol, nextRow = @grid.nextLocation(@col, @row, best_dir)
-      if nextCol == @hole.col && nextRow == @hole.row && !@grid.objects[[nextCol, nextRow]].equal?(@hole)
-        @hole = @grid.getClosestHole(@col, @row)
-        return
-      end  
       nextMove(best_dir)
     end
   end
