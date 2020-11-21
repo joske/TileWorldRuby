@@ -10,6 +10,6 @@ MAG = 20
 RANDOM_MOVE_PERC=20
 TIMEOUT=200
 
-grid = Grid.new(6, 20, 20, 20)
+grid = Grid.new(6, 20, 20, 40)
 app = TileWorld.new(grid)
 app.run

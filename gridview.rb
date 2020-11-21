@@ -111,7 +111,6 @@ class TileWorld < Gtk::Application
 
   def draw_text(cr, x, y, text)
     font = Pango::FontDescription.new
-    font.size = 10
     font.set_family("Monospace")
     font.set_weight(Pango::Weight::BOLD)
     layout = cr.create_pango_layout
