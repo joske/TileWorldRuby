@@ -24,6 +24,11 @@ class GridObject
   def row
     @row
   end
+
+  def equal?(other)
+    return @num == other.num && @col == other.col && @row == other.row
+  end
+
   def to_s
     return "#{self.class.name} #{@num} at col=#{@col}, row=#{@row}"
   end
@@ -81,6 +86,9 @@ class Agent < GridObject
   end
 
   def idle
+    @tile = nil
+    @hole = nil
+    @hasTile = false
     puts "#{self} finding tile"
     @tile = @grid.getClosestTile(@col, @row)
     puts "#{self} found tile #{@tile}"
@@ -96,11 +104,17 @@ class Agent < GridObject
     end
     best_dir = findBestMove(@tile.col, @tile.row)
     if best_dir != 0
+      nextCol, nextRow = @grid.nextLocation(@col, @row, best_dir)
+      if nextCol == @tile.col && nextRow == @tile.row && !@grid.objects[[nextCol, nextRow]].equal?(@tile)
+        @state = State::IDLE
+        return
+      end  
       nextMove(best_dir)
     end
   end
 
   def pickTile
+    puts "agent #{@num}: pickTile"
     @hasTile = true
     @grid.removeTile(@tile)
   end
@@ -144,11 +158,17 @@ class Agent < GridObject
     end
     best_dir = findBestMove(@hole.col, @hole.row)
     if best_dir != 0
+      nextCol, nextRow = @grid.nextLocation(@col, @row, best_dir)
+      if nextCol == @hole.col && nextRow == @hole.row && !@grid.objects[[nextCol, nextRow]].equal?(@hole)
+        @hole = @grid.getClosestHole(@col, @row)
+        return
+      end  
       nextMove(best_dir)
     end
   end
 
   def dumpTile
+    puts "agent #{@num}: dumpTile"
     @score += @tile.score
     @tile = nil
     @hasTile = false
@@ -158,7 +178,7 @@ class Agent < GridObject
   end
 
   def to_s
-    return "Agent #{@num} at col=#{@col}, row=#{@row} in state #{@state}"
+    return "Agent #{@num} at col=#{@col}, row=#{@row} in state #{@state} hasTile=#{@hasTile} tile=#{@tile} hole=#{@hole}"
   end
 end
 
