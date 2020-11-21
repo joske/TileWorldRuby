@@ -11,15 +11,15 @@ class Grid
     @numHoles = numHoles
     @numTiles = numTiles
 
-    @agents = []
-    @holes = Hash.new
-    @tiles = Hash.new
-    @obstacles = []
-    @objects = Hash.new # store as hash, with key the array [col, row] -- Ruby has no 2d array
+    @agents = [] # array, as the number of agents stays fixed
+    @holes = Hash.new # hash because holes/tiles appear/disappear 
+    @tiles = Hash.new 
+    @obstacles = [] # also fixed
+    @objects = Hash.new # store as hash, with key the array [col, row] -- Ruby has no real 2d array
     # create agents
     for a in 0..(numAgents - 1)
       col, row = randomFreeLocation
-      agent = Agent.new(self, a, col, row)
+      Agent.new(self, a, col, row)
     end
     for a in 0..(numHoles - 1)
       createHole(a)
@@ -29,7 +29,7 @@ class Grid
     end
     for a in 0..(numObstacles - 1)
       col, row = randomFreeLocation
-      obst = Obstacle.new(self, a, col, row)
+      Obstacle.new(self, a, col, row)
     end
   end
 
@@ -56,14 +56,12 @@ class Grid
   def createTile(a)
     score = rand(1..6)
     col, row = randomFreeLocation
-    tile = Tile.new(self, a, col, row, score)
-    @tiles[a] = tile
+    Tile.new(self, a, col, row, score)
   end
 
   def createHole(a)
     col, row = randomFreeLocation
     hole = Hole.new(self, a, col, row)
-    @holes[a] = hole
   end
 
   def removeTile(tile)
@@ -96,13 +94,13 @@ class Grid
 
   def validMove(col, row, dir)
     if (dir == Direction::UP)
-      return row > 1 && allowedLocation(col, row - 1)
+      return row > 0 && allowedLocation(col, row - 1)
     elsif (dir == Direction::DOWN)
-      return row < ROWS && allowedLocation(col, row + 1)
+      return row < ROWS - 1 && allowedLocation(col, row + 1)
     elsif (dir == Direction::LEFT)
-      return col > 1 && allowedLocation(col - 1, row)
+      return col > 0 && allowedLocation(col - 1, row)
     else
-      return col < COLS && allowedLocation(col + 1, row)
+      return col < COLS - 1 && allowedLocation(col + 1, row)
     end
   end
 
@@ -149,10 +147,10 @@ class Grid
   def update
     @agents.each() { |a|
       puts a
-      origRow, origCol = a.location
+      origCol, origRow = a.location
       a.update
       puts a
-      newRow, newCol = a.location
+      newCol, newRow = a.location
       @objects[[origCol, origRow]] = nil
       @objects[[newCol, newRow]] = a
     }

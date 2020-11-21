@@ -32,7 +32,7 @@ class TileWorld < Gtk::Application
         true
       end
 
-      GLib::Timeout.add(100) {
+      GLib::Timeout.add(TIMEOUT) {
         @grid.update
         rect = Gdk::Rectangle.new(0, 0, view.allocation.width, view.allocation.height)
         window.window.invalidate_rect(rect, false)
@@ -113,7 +113,7 @@ class TileWorld < Gtk::Application
     font = Pango::FontDescription.new
     font.size = 10
     font.set_family("Monospace")
-    font.set_weight(Pango::WEIGHT_BOLD)
+    font.set_weight(Pango::Weight::BOLD)
     layout = cr.create_pango_layout
     layout.set_text(text)
     layout.set_font_description(font)

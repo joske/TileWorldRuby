@@ -24,6 +24,9 @@ class GridObject
   def row
     @row
   end
+  def to_s
+    return "#{self.class.name} #{@num} at col=#{@col}, row=#{@row}"
+  end
 end
 
 class Agent < GridObject
@@ -103,10 +106,16 @@ class Agent < GridObject
   end
 
   def findBestMove(col, row)
-    r = rand(1..10)
-    if (r > 3)
+    r = rand(1..100)
+    if (r <= RANDOM_MOVE_PERC)
       # 20 % chance to pick a random move to get out of local minima
-      return rand(1..4)
+      dir = rand(1..4)
+      while ! @grid.validMove(@col, @row, dir)
+        dir = rand(1..4)
+      end
+      if @grid.validMove(@col, @row, dir)
+        return dir
+      end
     end
     min_dist = 100000
     best_dir = 0
@@ -149,7 +158,7 @@ class Agent < GridObject
   end
 
   def to_s
-    return "agent #{@num} at col=#{@col}, row=#{@row} in state #{@state}"
+    return "Agent #{@num} at col=#{@col}, row=#{@row} in state #{@state}"
   end
 end
 
