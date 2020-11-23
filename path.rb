@@ -22,6 +22,7 @@ def shortestPath(grid, from, to)
   return nil
 end
 
+#try to find the way via this direction
 def generateNext(grid, to, path, queue, direction)
   puts "generateNext #{direction}"
   last = path.last
@@ -38,6 +39,7 @@ def generateNext(grid, to, path, queue, direction)
   end
 end
 
+# check for loops
 def hasLoop(path, nextLocation)
   path.each { |l|
     if l.equal? nextLocation
@@ -47,6 +49,7 @@ def hasLoop(path, nextLocation)
   return false
 end
 
+# make a list of directions from a list of locations
 def makePath(list)
   path = []
   last = list.delete_at(0)
