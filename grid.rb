@@ -1,4 +1,4 @@
-require './objects.rb'
+require_relative "objects"
 
 module Direction
   UP = 1
@@ -37,34 +37,69 @@ class Location
     self.col == other.col && self.row == other.row
   end
 
+  def distance(other)
+    return (self.col - other.col).abs + (self.row - other.row).abs
+  end
+
+  def getDirection(other)
+    if @row == other.row
+      if @col == other.col + 1
+        return Direction::LEFT
+      else
+        return Direction::RIGHT
+      end
+    else
+      if @row == other.row + 1
+        return Direction::UP
+      else
+        return Direction::DOWN
+      end
+    end
+  end
+
   def to_s
     "location(#{@col}, #{@row})"
   end
 end
 
 class Grid
+  def initialize # unit test
+    @numAgents = 0
+    @numHoles = 0
+    @numTiles = 0
+    @agents = [] # array, as the number of agents stays fixed
+    @holes = Hash.new # hash because holes/tiles appear/disappear
+    @tiles = Hash.new
+    @obstacles = [] # also fixed
+    @objects = Hash.new # store as hash, with key the array [col, row] -- Ruby has no real 2d array
+  end
+
   def initialize(numAgents, numHoles, numTiles, numObstacles)
     @numAgents = numAgents
     @numHoles = numHoles
     @numTiles = numTiles
+    @numObstacles = numObstacles
 
     @agents = [] # array, as the number of agents stays fixed
-    @holes = Hash.new # hash because holes/tiles appear/disappear 
-    @tiles = Hash.new 
+    @holes = Hash.new # hash because holes/tiles appear/disappear
+    @tiles = Hash.new
     @obstacles = [] # also fixed
     @objects = Hash.new # store as hash, with key the array [col, row] -- Ruby has no real 2d array
+  end
+
+  def createObjects
     # create agents
-    for a in 0..(numAgents - 1)
+    for a in 0..(@numAgents - 1)
       location = randomFreeLocation
       Agent.new(self, a, location)
     end
-    for a in 0..(numHoles - 1)
+    for a in 0..(@numHoles - 1)
       createHole(a)
     end
-    for a in 0..(numTiles - 1)
+    for a in 0..(@numTiles - 1)
       createTile(a)
     end
-    for a in 0..(numObstacles - 1)
+    for a in 0..(@numObstacles - 1)
       location = randomFreeLocation
       Obstacle.new(self, a, location)
     end
@@ -140,15 +175,11 @@ class Grid
     return location
   end
 
-  def distance(location1, location2)
-    return (location1.col - location2.col).abs + (location1.row - location2.row).abs
-  end
-
   def getClosestTile(location)
     closest = 1000000
     best = nil
     @tiles.each_value { |t|
-      dist = distance(location, t.location)
+      dist = location.distance(t.location)
       if dist < closest
         closest = dist
         best = t
@@ -161,7 +192,7 @@ class Grid
     closest = 1000000
     best = nil
     @holes.each_value { |h|
-      dist = distance(location, h.location)
+      dist = location.distance(h.location)
       if dist < closest
         closest = dist
         best = h
@@ -180,5 +211,27 @@ class Grid
       @objects[[origLocation.col, origLocation.row]] = nil
       @objects[[newLocation.col, newLocation.row]] = a
     }
+  end
+
+  def printGrid
+    for r in 0..(ROWS - 1)
+      puts
+      for c in 0..(COLS - 1)
+        o = @objects[[c, r]]
+        if o != nil
+          if o.instance_of? Agent
+            print "A"
+          elsif o.instance_of? Hole
+            print "H"
+          elsif o.instance_of? Tile
+            print "T"
+          elsif o.instance_of? Obstacle
+            print "#"
+          end
+        else
+          print "."
+        end
+      end
+    end
   end
 end

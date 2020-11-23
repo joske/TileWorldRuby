@@ -1,3 +1,5 @@
+require_relative "path"
+
 module State
   IDLE = 0
   MOVE_TO_TILE = 1
@@ -45,6 +47,7 @@ class Agent < GridObject
     @tile = nil
     @hole = nil
     @score = 0
+    @path = []
     @hasTile = false
   end
 
@@ -116,10 +119,17 @@ class Agent < GridObject
     if !potentialTile.equal?(@tile)
       @tile = potentialTile
     end
-    best_dir = findBestMove(@tile.location)
-    if best_dir != 0
-      nextMove(best_dir)
+    if @path.empty?
+      @path = shortestPath(@grid, self.location, @tile.location)
+      puts "#{self} path: #{@path}"
+    else
+      dir = @path.shift
+      nextMove(dir)
     end
+    # best_dir = findBestMove(@tile.location)
+    # if best_dir != 0
+    #   nextMove(best_dir)
+    # end
   end
 
   def pickTile
@@ -133,7 +143,7 @@ class Agent < GridObject
     if (r <= RANDOM_MOVE_PERC)
       # RANDOM_MOVE_PERC % chance to pick a random move to get out of local minima
       dir = rand(1..4)
-      while ! @grid.validMove(@location, dir)
+      while !@grid.validMove(@location, dir)
         dir = rand(1..4)
       end
       if @grid.validMove(@location, dir)
@@ -149,7 +159,7 @@ class Agent < GridObject
         return dir
       end
       if @grid.freeLocation(newLocation)
-        dist = @grid.distance(location, newLocation)
+        dist = location.distance(newLocation)
         if dist < min_dist
           min_dist = dist
           best_dir = dir
