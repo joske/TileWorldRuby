@@ -1,8 +1,45 @@
+require './objects.rb'
+
 module Direction
   UP = 1
   DOWN = 2
   LEFT = 3
   RIGHT = 4
+end
+
+class Location
+  def initialize(col, row)
+    @col = col
+    @row = row
+  end
+
+  def row
+    @row
+  end
+
+  def col
+    @col
+  end
+
+  def nextLocation(dir)
+    if (dir == Direction::UP)
+      return Location.new(@col, @row - 1)
+    elsif (dir == Direction::DOWN)
+      return Location.new(@col, @row + 1)
+    elsif (dir == Direction::LEFT)
+      return Location.new(@col - 1, @row)
+    else
+      return Location.new(@col + 1, @row)
+    end
+  end
+
+  def equal?(other)
+    self.col == other.col && self.row == other.row
+  end
+
+  def to_s
+    "location(#{@col}, #{@row})"
+  end
 end
 
 class Grid
@@ -18,8 +55,8 @@ class Grid
     @objects = Hash.new # store as hash, with key the array [col, row] -- Ruby has no real 2d array
     # create agents
     for a in 0..(numAgents - 1)
-      col, row = randomFreeLocation
-      Agent.new(self, a, col, row)
+      location = randomFreeLocation
+      Agent.new(self, a, location)
     end
     for a in 0..(numHoles - 1)
       createHole(a)
@@ -28,8 +65,8 @@ class Grid
       createTile(a)
     end
     for a in 0..(numObstacles - 1)
-      col, row = randomFreeLocation
-      Obstacle.new(self, a, col, row)
+      location = randomFreeLocation
+      Obstacle.new(self, a, location)
     end
   end
 
@@ -55,13 +92,13 @@ class Grid
 
   def createTile(a)
     score = rand(1..6)
-    col, row = randomFreeLocation
-    Tile.new(self, a, col, row, score)
+    location = randomFreeLocation
+    Tile.new(self, a, location, score)
   end
 
   def createHole(a)
-    col, row = randomFreeLocation
-    hole = Hole.new(self, a, col, row)
+    location = randomFreeLocation
+    hole = Hole.new(self, a, location)
   end
 
   def removeTile(tile)
@@ -76,31 +113,19 @@ class Grid
     createHole(hole.num)
   end
 
-  def nextLocation(oldCol, oldRow, dir)
-    if (dir == Direction::UP)
-      return oldCol, oldRow - 1
-    elsif (dir == Direction::DOWN)
-      return oldCol, oldRow + 1
-    elsif (dir == Direction::LEFT)
-      return oldCol - 1, oldRow
-    else
-      return oldCol + 1, oldRow
-    end
+  def freeLocation(location)
+    @objects[[location.col, location.row]] == nil
   end
 
-  def allowedLocation(col, row)
-    @objects[[col, row]] == nil
-  end
-
-  def validMove(col, row, dir)
+  def validMove(location, dir)
     if (dir == Direction::UP)
-      return row > 0 && allowedLocation(col, row - 1)
+      return location.row > 0 && freeLocation(location.nextLocation(dir))
     elsif (dir == Direction::DOWN)
-      return row < ROWS - 1 && allowedLocation(col, row + 1)
+      return location.row < ROWS - 1 && freeLocation(location.nextLocation(dir))
     elsif (dir == Direction::LEFT)
-      return col > 0 && allowedLocation(col - 1, row)
+      return location.col > 0 && freeLocation(location.nextLocation(dir))
     else
-      return col < COLS - 1 && allowedLocation(col + 1, row)
+      return location.col < COLS - 1 && freeLocation(location.nextLocation(dir))
     end
   end
 
@@ -111,18 +136,19 @@ class Grid
       col = rand(0..COLS - 1)
       row = rand(0..ROWS - 1)
     end
-    return col, row
+    location = Location.new(col, row)
+    return location
   end
 
-  def distance(col1, row1, col2, row2)
-    return (col1 - col2).abs + (row1 - row2).abs
+  def distance(location1, location2)
+    return (location1.col - location2.col).abs + (location1.row - location2.row).abs
   end
 
-  def getClosestTile(col, row)
+  def getClosestTile(location)
     closest = 1000000
     best = nil
     @tiles.each_value { |t|
-      dist = distance(col, row, t.col, t.row)
+      dist = distance(location, t.location)
       if dist < closest
         closest = dist
         best = t
@@ -131,11 +157,11 @@ class Grid
     return best
   end
 
-  def getClosestHole(col, row)
+  def getClosestHole(location)
     closest = 1000000
     best = nil
     @holes.each_value { |h|
-      dist = distance(col, row, h.col, h.row)
+      dist = distance(location, h.location)
       if dist < closest
         closest = dist
         best = h
@@ -147,12 +173,12 @@ class Grid
   def update
     @agents.each() { |a|
       puts a
-      origCol, origRow = a.location
+      origLocation = a.location
       a.update
       puts a
-      newCol, newRow = a.location
-      @objects[[origCol, origRow]] = nil
-      @objects[[newCol, newRow]] = a
+      newLocation = a.location
+      @objects[[origLocation.col, origLocation.row]] = nil
+      @objects[[newLocation.col, newLocation.row]] = a
     }
   end
 end
