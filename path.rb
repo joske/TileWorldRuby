@@ -27,7 +27,7 @@ def generateNext(grid, to, path, queue, direction)
   puts "generateNext #{direction}"
   last = path.last
   nextLocation = last.nextLocation(direction)
-  if (grid.freeLocation(nextLocation) || nextLocation.equal?(to))
+  if (grid.validMove(last, direction) || nextLocation.equal?(to))
     puts "considering this direction"
     newPath = Array.new(path)
     if !hasLoop(newPath, nextLocation)
