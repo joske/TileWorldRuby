@@ -36,14 +36,14 @@ class TileWorld < Gtk::Application
         @grid.update
         rect = Gdk::Rectangle.new(0, 0, view.allocation.width, view.allocation.height)
         window.window.invalidate_rect(rect, false)
-        redraw(view, surface, @grid.objects)
+        redraw(view, surface, @grid)
         true
       }
       window.show_all
     end
   end
 
-  def redraw(view, surface, objects)
+  def redraw(view, surface, grid)
     cr = Cairo::Context.new(surface)
     cr.set_source_rgb(1, 1, 1)
     cr.paint
@@ -53,7 +53,7 @@ class TileWorld < Gtk::Application
       puts
       for c in 0..(COLS - 1)
         cr.set_source_rgb(0, 0, 0)
-        o = objects[[c, r]]
+        o = grid.object(Location.new(c, r))
         if o != nil
           x = c * MAG
           y = r * MAG

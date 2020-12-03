@@ -34,7 +34,19 @@ class Location
   end
 
   def equal?(other)
-    self.col == other.col && self.row == other.row
+    return @col == other.col && @row == other.row
+  end
+
+  def ==(other)
+    return @col == other.col && @row == other.row
+  end
+
+  def eql?(other)
+    return @col == other.col && @row == other.row
+  end
+
+  def hash
+    return @col << 8 & @row.hash
   end
 
   def distance(other)
@@ -91,7 +103,7 @@ class Grid
     # create agents
     for a in 0..(@numAgents - 1)
       location = randomFreeLocation
-      Agent.new(self, a, location)
+      @objects[location] = Agent.new(self, a, location)
     end
     for a in 0..(@numHoles - 1)
       createHole(a)
@@ -101,12 +113,8 @@ class Grid
     end
     for a in 0..(@numObstacles - 1)
       location = randomFreeLocation
-      Obstacle.new(self, a, location)
+      @objects[location] = Obstacle.new(self, a, location)
     end
-  end
-
-  def objects
-    @objects
   end
 
   def agents
@@ -121,6 +129,10 @@ class Grid
     @holes
   end
 
+  def object(location)
+    return @objects[location]
+  end
+
   def obstacles
     @obstacles
   end
@@ -128,28 +140,28 @@ class Grid
   def createTile(a)
     score = rand(1..6)
     location = randomFreeLocation
-    Tile.new(self, a, location, score)
+    @objects[location] = Tile.new(self, a, location, score)
   end
 
   def createHole(a)
     location = randomFreeLocation
-    hole = Hole.new(self, a, location)
+    @objects[location] = Hole.new(self, a, location)
   end
 
   def removeTile(tile)
     @tiles.delete(tile.num)
-    @objects[[tile.col, tile.row]] = nil
+    @objects[tile.location] = nil
     createTile(tile.num)
   end
 
   def removeHole(hole)
     @holes.delete(hole.num)
-    @objects[[hole.col, hole.row]] = nil
+    @objects[hole.location] = nil
     createHole(hole.num)
   end
 
   def freeLocation(location)
-    @objects[[location.col, location.row]] == nil
+    object(location) == nil
   end
 
   def validMove(location, dir)
@@ -167,11 +179,12 @@ class Grid
   def randomFreeLocation
     col = rand(0..COLS - 1)
     row = rand(0..ROWS - 1)
-    while @objects[[col, row]] != nil
+    location = Location.new(col, row)
+    while object(location) != nil
       col = rand(0..COLS - 1)
       row = rand(0..ROWS - 1)
+      location = Location.new(col, row)
     end
-    location = Location.new(col, row)
     return location
   end
 
@@ -208,8 +221,8 @@ class Grid
       a.update
       puts a
       newLocation = a.location
-      @objects[[origLocation.col, origLocation.row]] = nil
-      @objects[[newLocation.col, newLocation.row]] = a
+      @objects[origLocation] = nil
+      @objects[newLocation] = a
     }
   end
 
@@ -217,7 +230,8 @@ class Grid
     for r in 0..(ROWS - 1)
       puts
       for c in 0..(COLS - 1)
-        o = @objects[[c, r]]
+        location = Location.new(c, r)
+        o = object(location)
         if o != nil
           if o.instance_of? Agent
             print "A"

@@ -11,7 +11,6 @@ class GridObject
     @num = num
     @grid = grid
     @location = location
-    grid.objects[[location.col, location.row]] = self
   end
 
   def num
@@ -110,7 +109,7 @@ class Agent < GridObject
       return
     end
     # check if our tile is still there
-    if !@grid.objects[[@tile.col, @tile.row]].equal?(@tile)
+    if !@grid.object(@tile.location).equal?(@tile)
       @state = State::IDLE
       return
     end
@@ -176,7 +175,7 @@ class Agent < GridObject
       return
     end
     # check if our hole is still there
-    if !@grid.objects[[@hole.col, @hole.row]].equal?(@hole)
+    if !@grid.object(@hole.location).equal?(@hole)
       @hole = @grid.getClosestHole(@location)
       return
     end
