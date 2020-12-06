@@ -34,6 +34,7 @@ class TileWorld < Gtk::Application
 
       GLib::Timeout.add(TIMEOUT) {
         @grid.update
+        @grid.printGrid
         rect = Gdk::Rectangle.new(0, 0, view.allocation.width, view.allocation.height)
         window.window.invalidate_rect(rect, false)
         redraw(view, surface, @grid)
@@ -50,7 +51,6 @@ class TileWorld < Gtk::Application
     cr.set_line_width(2)
     cr.rectangle(0, 0, COLS * MAG, ROWS * MAG)
     for r in 0..(ROWS - 1)
-      puts
       for c in 0..(COLS - 1)
         cr.set_source_rgb(0, 0, 0)
         o = grid.object(Location.new(c, r))
@@ -58,27 +58,21 @@ class TileWorld < Gtk::Application
           x = c * MAG
           y = r * MAG
           if o.instance_of? Agent
-            print "A"
             drawAgent(view, cr, o, x, y)
           elsif o.instance_of? Hole
-            print "H"
             cr.arc(x + MAG / 2, y + MAG / 2, MAG / 2, 0, 2 * Math::PI)
             cr.fill
           elsif o.instance_of? Tile
-            print "T"
             drawTile view, cr, o, x, y
           elsif o.instance_of? Obstacle
-            print "#"
             cr.rectangle(x, y, MAG, MAG)
             cr.fill()
           end
         else
-          print "."
         end
         cr.stroke
       end
     end
-    puts
     x = COLS * MAG + 50
     y = 20
     @grid.agents.each { |a|
@@ -87,7 +81,6 @@ class TileWorld < Gtk::Application
       id = a.num
       text = "Agent(#{id}): #{a.score}"
       draw_text cr, x, y + id * MAG, text
-      puts text
     }
   end
 

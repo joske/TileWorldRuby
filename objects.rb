@@ -7,9 +7,8 @@ module State
 end
 
 class GridObject
-  def initialize(grid, num, location)
+  def initialize(num, location)
     @num = num
-    @grid = grid
     @location = location
   end
 
@@ -40,8 +39,8 @@ end
 
 class Agent < GridObject
   def initialize(grid, num, location)
-    super grid, num, location
-    grid.agents[num] = self
+    super num, location
+    @grid = grid
     @state = State::IDLE
     @tile = nil
     @hole = nil
@@ -110,12 +109,14 @@ class Agent < GridObject
     end
     # check if our tile is still there
     if !@grid.object(@tile.location).equal?(@tile)
+      puts "#{self} our tile is gone"
       @state = State::IDLE
       return
     end
     # try to find a closer tile
     potentialTile = @grid.getClosestTile(@location)
     if !potentialTile.equal?(@tile)
+      puts "#{self} tile #{potentialTile} is now closer than #{@tile}"
       @tile = potentialTile
     end
     if @path.empty?
@@ -125,47 +126,12 @@ class Agent < GridObject
       dir = @path.shift
       nextMove(dir)
     end
-    # best_dir = findBestMove(@tile.location)
-    # if best_dir != 0
-    #   nextMove(best_dir)
-    # end
   end
 
   def pickTile
     puts "agent #{@num}: pickTile"
     @hasTile = true
     @grid.removeTile(@tile)
-  end
-
-  def findBestMove(location)
-    r = rand(1..100)
-    if (r <= RANDOM_MOVE_PERC)
-      # RANDOM_MOVE_PERC % chance to pick a random move to get out of local minima
-      dir = rand(1..4)
-      while !@grid.validMove(@location, dir)
-        dir = rand(1..4)
-      end
-      if @grid.validMove(@location, dir)
-        return dir
-      end
-    end
-    min_dist = 100000
-    best_dir = 0
-    for dir in 1..4
-      newLocation = @location.nextLocation(dir)
-      if newLocation.equal? location
-        #arrived
-        return dir
-      end
-      if @grid.freeLocation(newLocation)
-        dist = location.distance(newLocation)
-        if dist < min_dist
-          min_dist = dist
-          best_dir = dir
-        end
-      end
-    end
-    return best_dir
   end
 
   def moveToHole
@@ -176,18 +142,22 @@ class Agent < GridObject
     end
     # check if our hole is still there
     if !@grid.object(@hole.location).equal?(@hole)
+      puts "#{self} our hole is gone"
       @hole = @grid.getClosestHole(@location)
       return
     end
     # try to find a closer hole
     potentialHole = @grid.getClosestHole(@location)
     if !potentialHole.equal?(@hole)
+      puts "#{self} tile #{potentialHole} is now closer than #{@hole}"
       @hole = potentialHole
     end
-    best_dir = findBestMove(@hole.location)
-    if best_dir != 0
-      nextlocation = @location.nextLocation(best_dir)
-      nextMove(best_dir)
+    if @path.empty?
+      @path = shortestPath(@grid, self.location, @hole.location)
+      puts "#{self} path: #{@path}"
+    else
+      dir = @path.shift
+      nextMove(dir)
     end
   end
 
@@ -207,16 +177,14 @@ class Agent < GridObject
 end
 
 class Hole < GridObject
-  def initialize(grid, num, location)
-    super grid, num, location
-    grid.holes[num] = self
+  def initialize(num, location)
+    super num, location
   end
 end
 
 class Tile < GridObject
-  def initialize(grid, num, location, score)
-    super grid, num, location
-    grid.tiles[num] = self
+  def initialize(num, location, score)
+    super num, location
     @score = score
 
     def score
@@ -226,8 +194,7 @@ class Tile < GridObject
 end
 
 class Obstacle < GridObject
-  def initialize(grid, num, location)
-    super grid, num, location
-    grid.obstacles[num] = self
+  def initialize(num, location)
+    super num, location
   end
 end

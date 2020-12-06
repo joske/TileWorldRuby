@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 require_relative "path.rb"
+require_relative "astar.rb"
 require_relative "grid.rb"
 
 require "test/unit"
@@ -9,9 +10,9 @@ ROWS = 5
 
 class TestPath < Test::Unit::TestCase
   def testSearch
-    grid = Grid.new(1, 0, 1, 0)
+    grid = Grid.new
     agent = Agent.new(grid, 0, Location.new(0, 0))
-    tile = Tile.new(grid, 0, Location.new(2, 1), 1)
+    tile = Tile.new(0, Location.new(2, 1), 1)
     path = shortestPath(grid, agent.location, tile.location)
     puts "from #{agent.location} to #{tile.location} : #{path}"
     path.each { |dir|
@@ -19,6 +20,18 @@ class TestPath < Test::Unit::TestCase
     }
     assert_equal(agent.location, tile.location)
   end
+
+  # def testAstarSearch
+  #   grid = Grid.new(1, 0, 1, 0)
+  #   agent = Agent.new(grid, 0, Location.new(0, 0))
+  #   tile = Tile.new(grid, 0, Location.new(2, 1), 1)
+  #   path = astar_search(grid, agent.location, tile.location)
+  #   puts "from #{agent.location} to #{tile.location} : #{path}"
+  #   path.each { |dir|
+  #     agent.nextMove(dir)
+  #   }
+  #   assert_equal(agent.location, tile.location)
+  # end
 
   def testLocationEquals
     first = Location.new(1, 2)

@@ -75,18 +75,7 @@ class Location
 end
 
 class Grid
-  def initialize # unit test
-    @numAgents = 0
-    @numHoles = 0
-    @numTiles = 0
-    @agents = [] # array, as the number of agents stays fixed
-    @holes = Hash.new # hash because holes/tiles appear/disappear
-    @tiles = Hash.new
-    @obstacles = [] # also fixed
-    @objects = Hash.new # store as hash, with key the array [col, row] -- Ruby has no real 2d array
-  end
-
-  def initialize(numAgents, numHoles, numTiles, numObstacles)
+  def initialize(numAgents = 0, numHoles = 0, numTiles = 0, numObstacles = 0)
     @numAgents = numAgents
     @numHoles = numHoles
     @numTiles = numTiles
@@ -96,24 +85,27 @@ class Grid
     @holes = Hash.new # hash because holes/tiles appear/disappear
     @tiles = Hash.new
     @obstacles = [] # also fixed
-    @objects = Hash.new # store as hash, with key the array [col, row] -- Ruby has no real 2d array
+    @objects = Array.new(COLS) { Array.new(ROWS) { nil } }
   end
 
   def createObjects
-    # create agents
-    for a in 0..(@numAgents - 1)
+    for i in 0..(@numAgents - 1)
       location = randomFreeLocation
-      @objects[location] = Agent.new(self, a, location)
+      agent = Agent.new(self, i, location)
+      set_object(location, agent)
+      @agents[i] = agent
     end
-    for a in 0..(@numHoles - 1)
-      createHole(a)
+    for i in 0..(@numHoles - 1)
+      createHole(i)
     end
-    for a in 0..(@numTiles - 1)
-      createTile(a)
+    for i in 0..(@numTiles - 1)
+      createTile(i)
     end
-    for a in 0..(@numObstacles - 1)
+    for i in 0..(@numObstacles - 1)
       location = randomFreeLocation
-      @objects[location] = Obstacle.new(self, a, location)
+      obst = Obstacle.new(i, location)
+      set_object(location, obst)
+      @obstacles[i] = obst
     end
   end
 
@@ -129,51 +121,61 @@ class Grid
     @holes
   end
 
-  def object(location)
-    return @objects[location]
-  end
-
   def obstacles
     @obstacles
   end
 
-  def createTile(a)
-    score = rand(1..6)
-    location = randomFreeLocation
-    @objects[location] = Tile.new(self, a, location, score)
+  def object(location)
+    if location.col > COLS - 1 || location.col < 0
+      raise "Alles kapot: column out of range: #{location.col}"
+    end
+    if location.row > ROWS - 1 || location.row < 0
+      raise "Alles kapot: row out of range: #{location.row}"
+    end
+    return @objects[location.col][location.row]
   end
 
-  def createHole(a)
+  def set_object(location, o)
+    @objects[location.col][location.row] = o
+  end
+
+  def createTile(num)
+    score = rand(1..6)
     location = randomFreeLocation
-    @objects[location] = Hole.new(self, a, location)
+    tile = Tile.new(num, location, score)
+    set_object(location, tile)
+    @tiles[num] = tile
+  end
+
+  def createHole(num)
+    location = randomFreeLocation
+    hole = Hole.new(num, location)
+    set_object(location, hole)
+    @holes[num] = hole
   end
 
   def removeTile(tile)
     @tiles.delete(tile.num)
-    @objects[tile.location] = nil
+    set_object(tile.location, nil)
     createTile(tile.num)
   end
 
   def removeHole(hole)
     @holes.delete(hole.num)
-    @objects[hole.location] = nil
+    set_object(hole.location, nil)
     createHole(hole.num)
   end
 
+  def validLocation(location)
+    return location.row >= 0 && location.row < ROWS - 1 && location.col >= 0 && location.col < COLS - 1
+  end
+
   def freeLocation(location)
-    object(location) == nil
+    validLocation(location) && object(location) == nil
   end
 
   def validMove(location, dir)
-    if (dir == Direction::UP)
-      return location.row > 0 && freeLocation(location.nextLocation(dir))
-    elsif (dir == Direction::DOWN)
-      return location.row < ROWS - 1 && freeLocation(location.nextLocation(dir))
-    elsif (dir == Direction::LEFT)
-      return location.col > 0 && freeLocation(location.nextLocation(dir))
-    else
-      return location.col < COLS - 1 && freeLocation(location.nextLocation(dir))
-    end
+    return freeLocation(location.nextLocation(dir))
   end
 
   def randomFreeLocation
@@ -221,14 +223,19 @@ class Grid
       a.update
       puts a
       newLocation = a.location
-      @objects[origLocation] = nil
-      @objects[newLocation] = a
+      set_object(origLocation, nil)
+      set_object(newLocation, a)
     }
   end
 
   def printGrid
+    print "  "
+    for c in 0..(COLS - 1)
+      printf "%d", c % 10
+    end
     for r in 0..(ROWS - 1)
       puts
+      printf "%02d", r
       for c in 0..(COLS - 1)
         location = Location.new(c, r)
         o = object(location)
@@ -247,5 +254,11 @@ class Grid
         end
       end
     end
+    puts
+    @agents.each { |a|
+      id = a.num
+      text = "Agent(#{id}): #{a.score}"
+      puts text
+    }
   end
 end

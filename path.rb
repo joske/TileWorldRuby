@@ -1,8 +1,16 @@
 require "treemap"
 
+debug = false
+
+def log(text)
+  if debug
+    puts text
+  end
+end
+
 def shortestPath(grid, from, to)
   grid.printGrid
-  puts "finding path from #{from} to #{to}"
+  log "finding path from #{from} to #{to}"
   list = []
   queue = TreeMap.new
   list << from
@@ -19,23 +27,25 @@ def shortestPath(grid, from, to)
     generateNext(grid, to, path, queue, Direction::LEFT)
     generateNext(grid, to, path, queue, Direction::RIGHT)
   end
-  return nil
+  return []
 end
 
 #try to find the way via this direction
 def generateNext(grid, to, path, queue, direction)
-  puts "generateNext #{direction}"
+  log "generateNext #{direction}"
   last = path.last
   nextLocation = last.nextLocation(direction)
   if (grid.validMove(last, direction) || nextLocation.equal?(to))
-    puts "considering this direction"
+    log "considering this direction"
     newPath = Array.new(path)
     if !hasLoop(newPath, nextLocation)
       newPath << nextLocation
       cost = newPath.size + nextLocation.distance(to)
-      puts "no loop, adding #{nextLocation} at cost #{cost} to path: #{newPath}"
+      log "no loop, adding #{nextLocation} at cost #{cost} to path: #{newPath}"
       queue.put(cost, newPath)
     end
+  else
+    log "invalid direction"
   end
 end
 
