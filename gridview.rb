@@ -92,14 +92,14 @@ class TileWorld < Gtk::Application
       cr.new_sub_path
       cr.arc(x + MAG / 2, y + MAG / 2, MAG / 2, 0, 2 * Math::PI)
       cr.new_sub_path
-      draw_text(cr, x + MAG / 4, y, a.tile.score.to_s)
+      draw_text(cr, x + MAG / 4, y + 3, a.tile.score.to_s)
     end
   end
 
   def drawTile(view, cr, tile, x, y)
     cr.arc(x + MAG / 2, y + MAG / 2, MAG / 2, 0, 2 * Math::PI)
     cr.new_sub_path
-    draw_text(cr, x + MAG / 4, y, tile.score.to_s)
+    draw_text(cr, x + MAG / 4, y + 3, tile.score.to_s)
   end
 
   def draw_text(cr, x, y, text)

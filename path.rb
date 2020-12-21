@@ -1,9 +1,9 @@
 require "treemap"
 
-debug = false
+$debug = false
 
 def log(text)
-  if debug
+  if $debug
     puts text
   end
 end
