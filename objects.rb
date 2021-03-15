@@ -120,7 +120,7 @@ class Agent < GridObject
       @tile = potentialTile
     end
     if @path.empty?
-      @path = shortestPath(@grid, self.location, @tile.location)
+      @path = astar(@grid, self.location, @tile.location)
       puts "#{self} path: #{@path}"
     else
       dir = @path.shift
@@ -153,7 +153,7 @@ class Agent < GridObject
       @hole = potentialHole
     end
     if @path.empty?
-      @path = shortestPath(@grid, self.location, @hole.location)
+      @path = astar(@grid, self.location, @hole.location)
       puts "#{self} path: #{@path}"
     else
       dir = @path.shift
