@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'algorithms'
+require 'set'
 
 # node holder
 class Node
@@ -55,7 +56,10 @@ def checkNeighbor(grid, open_list, closed_list, current, direction, from, to)
     h = nextLocation.distance(to)
     g = current.location.distance(from) + 1
     child = Node.new(nextLocation, current, g + h)
-    if (!closed_list.include?(child))
+    lowerChild = closed_list.select() { |node|
+      node.location.equal?(child.location) && node.score < child.score
+    }
+    if (lowerChild.empty?)
         puts "adding child #{child}"
         open_list.push(child, child.score)
     end

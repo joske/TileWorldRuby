@@ -1,5 +1,4 @@
 #!/usr/bin/env ruby
-require_relative "path.rb"
 require_relative "astar.rb"
 require_relative "grid.rb"
 

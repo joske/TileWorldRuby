@@ -1,4 +1,4 @@
-require_relative "path"
+require_relative 'astar'
 
 module State
   IDLE = 0
@@ -7,17 +7,11 @@ module State
 end
 
 class GridObject
+  attr_reader :num
+  attr_reader :location
   def initialize(num, location)
     @num = num
     @location = location
-  end
-
-  def num
-    @num
-  end
-
-  def location
-    @location
   end
 
   def col
@@ -29,15 +23,17 @@ class GridObject
   end
 
   def equal?(other)
-    return @num == other.num && @location == other.location && self.class == other.class
+    @num == other.num && @location == other.location && self.class == other.class
   end
 
   def to_s
-    return "#{self.class.name} #{@num} at #{location}"
+    "#{self.class.name} #{@num} at #{location}"
   end
 end
 
 class Agent < GridObject
+  attr_accessor :score
+
   def initialize(grid, num, location)
     super num, location
     @grid = grid
@@ -47,14 +43,6 @@ class Agent < GridObject
     @score = 0
     @path = []
     @hasTile = false
-  end
-
-  def set_score(score)
-    @score = score
-  end
-
-  def score
-    @score
   end
 
   # updates the location of this agent
@@ -120,11 +108,17 @@ class Agent < GridObject
       @tile = potentialTile
     end
     if @path.empty?
-      @path = astar(@grid, self.location, @tile.location)
+      @path = astar(@grid, @location, @tile.location)
       puts "#{self} path: #{@path}"
     else
       dir = @path.shift
-      nextMove(dir)
+      nextLoc = @location.nextLocation(dir)
+      if @grid.validLocation(nextLoc) || nextLoc.equal?(@tile.location)
+        nextMove(dir)
+      else
+        # hmm, something in the way suddenly
+        @path = astar(@grid, @location, @tile.location)
+      end
     end
   end
 
@@ -157,7 +151,11 @@ class Agent < GridObject
       puts "#{self} path: #{@path}"
     else
       dir = @path.shift
-      nextMove(dir)
+      if @grid.validLocation(@location.nextLocation(dir)) || nextLoc.equal?(@hole.location)
+        nextMove(dir)
+      else
+        @path = astar(@grid, @location, @hole.location)
+      end
     end
   end
 
@@ -177,24 +175,17 @@ class Agent < GridObject
 end
 
 class Hole < GridObject
-  def initialize(num, location)
-    super num, location
-  end
 end
 
 class Tile < GridObject
   def initialize(num, location, score)
     super num, location
     @score = score
-
-    def score
-      @score
-    end
+  end
+  def score
+    @score
   end
 end
 
 class Obstacle < GridObject
-  def initialize(num, location)
-    super num, location
-  end
 end
