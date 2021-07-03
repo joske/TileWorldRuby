@@ -53,28 +53,14 @@ class Location
     return (self.col - other.col).abs + (self.row - other.row).abs
   end
 
-  def getDirection(other)
-    if @row == other.row
-      if @col == other.col + 1
-        return Direction::LEFT
-      else
-        return Direction::RIGHT
-      end
-    else
-      if @row == other.row + 1
-        return Direction::UP
-      else
-        return Direction::DOWN
-      end
-    end
-  end
-
   def to_s
     "location(#{@col}, #{@row})"
   end
 end
 
 class Grid
+  attr_reader :agents
+
   def initialize(numAgents = 0, numHoles = 0, numTiles = 0, numObstacles = 0)
     @numAgents = numAgents
     @numHoles = numHoles
@@ -107,22 +93,6 @@ class Grid
       set_object(location, obst)
       @obstacles[i] = obst
     end
-  end
-
-  def agents
-    @agents
-  end
-
-  def tiles
-    @tiles
-  end
-
-  def holes
-    @holes
-  end
-
-  def obstacles
-    @obstacles
   end
 
   def object(location)
@@ -168,11 +138,11 @@ class Grid
   end
 
   def validLocation(location)
-    return location.row >= 0 && location.row < ROWS - 1 && location.col >= 0 && location.col < COLS - 1
+    return location.row >= 0 && location.row < ROWS && location.col >= 0 && location.col < COLS
   end
 
   def freeLocation(location)
-    validLocation(location) && object(location) == nil
+    validLocation(location) && object(location).nil?
   end
 
   def randomFreeLocation
