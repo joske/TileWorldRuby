@@ -155,15 +155,16 @@ class Grid
   end
 
   def removeTile(tile)
-    @tiles.delete(tile.num)
     set_object(tile.location, nil)
-    createTile(tile.num)
+    tile.location = randomFreeLocation
+    set_object(tile.location, tile)
+    tile.score = rand(1..6)
   end
 
   def removeHole(hole)
-    @holes.delete(hole.num)
     set_object(hole.location, nil)
-    createHole(hole.num)
+    hole.location = randomFreeLocation
+    set_object(hole.location, hole)
   end
 
   def validLocation(location)
@@ -172,10 +173,6 @@ class Grid
 
   def freeLocation(location)
     validLocation(location) && object(location) == nil
-  end
-
-  def validMove(location, dir)
-    return freeLocation(location.nextLocation(dir))
   end
 
   def randomFreeLocation

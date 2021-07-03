@@ -8,7 +8,7 @@ end
 
 class GridObject
   attr_reader :num
-  attr_reader :location
+  attr_accessor :location
   def initialize(num, location)
     @num = num
     @location = location
@@ -46,12 +46,12 @@ class Agent < GridObject
   end
 
   # updates the location of this agent
-  def nextMove(dir)
-    puts "move #{dir}"
-    @location = @location.nextLocation(dir)
+  def nextMove(location)
+    puts "move #{location}"
+    @location = location
   end
 
-  def location()
+  def location
     @location
   end
 
@@ -91,8 +91,6 @@ class Agent < GridObject
     if @tile.location.equal? self.location
       # we have arrived
       pickTile
-      @hole = @grid.getClosestHole(@location)
-      @state = State::MOVE_TO_HOLE
       return
     end
     # check if our tile is still there
@@ -111,10 +109,9 @@ class Agent < GridObject
       @path = astar(@grid, @location, @tile.location)
       puts "#{self} path: #{@path}"
     else
-      dir = @path.shift
-      nextLoc = @location.nextLocation(dir)
-      if @grid.validLocation(nextLoc) || nextLoc.equal?(@tile.location)
-        nextMove(dir)
+      nextLoc = @path.shift
+      if @grid.freeLocation(nextLoc) || nextLoc.equal?(@tile.location)
+        nextMove(nextLoc)
       else
         # hmm, something in the way suddenly
         @path = astar(@grid, @location, @tile.location)
@@ -126,7 +123,9 @@ class Agent < GridObject
     puts "agent #{@num}: pickTile"
     @hasTile = true
     @grid.removeTile(@tile)
-  end
+    @hole = @grid.getClosestHole(@location)
+    @state = State::MOVE_TO_HOLE
+end
 
   def moveToHole
     if @location.equal? @hole.location
@@ -150,9 +149,9 @@ class Agent < GridObject
       @path = astar(@grid, self.location, @hole.location)
       puts "#{self} path: #{@path}"
     else
-      dir = @path.shift
-      if @grid.validLocation(@location.nextLocation(dir)) || nextLoc.equal?(@hole.location)
-        nextMove(dir)
+      nextLoc = @path.shift
+      if @grid.freeLocation(nextLoc) || nextLoc.equal?(@hole.location)
+        nextMove(nextLoc)
       else
         @path = astar(@grid, @location, @hole.location)
       end
@@ -166,7 +165,9 @@ class Agent < GridObject
     @hasTile = false
     @grid.removeHole(@hole)
     @hole = nil
-    @state = State::IDLE
+    @tile = @grid.getClosestTile(@location)
+    puts "#{self} found tile #{@tile}"
+    @state = State::MOVE_TO_TILE
   end
 
   def to_s
@@ -178,12 +179,10 @@ class Hole < GridObject
 end
 
 class Tile < GridObject
+  attr_accessor :score
   def initialize(num, location, score)
     super num, location
     @score = score
-  end
-  def score
-    @score
   end
 end
 
