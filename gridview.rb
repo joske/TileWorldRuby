@@ -35,7 +35,6 @@ class TileWorld < Gtk::Application
 
       GLib::Timeout.add(TIMEOUT) do
         @grid.update
-        @grid.printGrid
         rect = Gdk::Rectangle.new(0, 0, view.allocation.width, view.allocation.height)
         window.window.invalidate_rect(rect, false)
         redraw(view, surface, @grid)

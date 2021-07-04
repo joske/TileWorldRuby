@@ -71,7 +71,7 @@ class Grid
 
   def createObjects
     (0..(@num_agents - 1)).each do |i|
-      location = randomFreeLocation
+      location = random_free_location
       agent = Agent.new(self, i, location)
       set_object(location, agent)
       @agents[i] = agent
@@ -83,7 +83,7 @@ class Grid
       createTile(i)
     end
     (0..(@num_obstacles - 1)).each do |i|
-      location = randomFreeLocation
+      location = random_free_location
       obst = Obstacle.new(i, location)
       set_object(location, obst)
       @obstacles[i] = obst
@@ -103,14 +103,14 @@ class Grid
 
   def createTile(num)
     score = rand(1..6)
-    location = randomFreeLocation
+    location = random_free_location
     tile = Tile.new(num, location, score)
     set_object(location, tile)
     @tiles[num] = tile
   end
 
   def createHole(num)
-    location = randomFreeLocation
+    location = random_free_location
     hole = Hole.new(num, location)
     set_object(location, hole)
     @holes[num] = hole
@@ -136,7 +136,7 @@ class Grid
     validLocation(location) && object(location).nil?
   end
 
-  def randomFreeLocation
+  def random_free_location
     col = rand(0..COLS - 1)
     row = rand(0..ROWS - 1)
     location = Location.new(col, row)
@@ -177,39 +177,23 @@ class Grid
   def update
     @agents.each do |a|
       puts a
-      origLocation = a.location
+      orig = a.location
       a.update
       puts a
-      newLocation = a.location
-      set_object(origLocation, nil)
-      set_object(newLocation, a)
+      new_loc = a.location
+      set_object(orig, nil)
+      set_object(new_loc, a)
     end
+    print_grid
   end
 
-  def printGrid
-    print '  '
-    (0..(COLS - 1)).each do |c|
-      printf '%d', c % 10
-    end
+  def print_grid
+    print_header
     (0..(ROWS - 1)).each do |r|
       puts
-      printf '%02d', r
+      printf '%02d', r # print row number
       (0..(COLS - 1)).each do |c|
-        location = Location.new(c, r)
-        o = object(location)
-        if !o.nil?
-          if o.instance_of? Agent
-            print 'A'
-          elsif o.instance_of? Hole
-            print 'H'
-          elsif o.instance_of? Tile
-            print 'T'
-          elsif o.instance_of? Obstacle
-            print '#'
-          end
-        else
-          print '.'
-        end
+        print_row(c, r)
       end
     end
     puts
@@ -218,5 +202,31 @@ class Grid
       text = "Agent(#{id}): #{a.score}"
       puts text
     end
+  end
+end
+
+# print column numbers
+def print_header
+  print '  '
+  (0..(COLS - 1)).each do |c|
+    printf '%d', c % 10
+  end
+end
+
+def print_row(c, r)
+  location = Location.new(c, r)
+  o = object(location)
+  if !o.nil?
+    if o.instance_of? Agent
+      print 'A'
+    elsif o.instance_of? Hole
+      print 'H'
+    elsif o.instance_of? Tile
+      print 'T'
+    elsif o.instance_of? Obstacle
+      print '#'
+    end
+  else
+    print '.'
   end
 end
