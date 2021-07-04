@@ -11,9 +11,11 @@ class Node
     @path = p
     @score = s
   end
+
   def ==(other)
     @location.equal?(other.location)
   end
+
   def <=>(other)
     @score <=> other.score
   end
@@ -24,9 +26,9 @@ class Node
 end
 
 def astar(grid, from, to)
-  open_list = Containers::PriorityQueue.new { |x, y|
+  open_list = Containers::PriorityQueue.new do |x, y|
     (y <=> x) == 1
-  }
+  end
   open_set = Set.new
   closed_list = Set.new
   fromNode = Node.new(from, nil, 0)
@@ -54,18 +56,18 @@ def checkNeighbor(grid, open_list, open_set, closed_list, current, direction, fr
   if grid.freeLocation(nextLocation) || nextLocation.equal?(to)
     h = nextLocation.distance(to)
     g = current.location.distance(from) + 1
-    path = Array::new
+    path = []
     path.append(*current.path).append(nextLocation)
     child = Node.new(nextLocation, path, g + h)
-    if (!closed_list.include?(child))
-      better = open_set.filter { |n|
+    unless closed_list.include?(child)
+      better = open_set.filter do |n|
         n.location.equal?(child.location) && n.score < child.score
-      }
-      if (better.empty?)
+      end
+      if better.empty?
         puts "adding child #{child}"
         open_list.push(child, child.score)
         open_set.add(child)
       end
-    end    
+    end
   end
 end
