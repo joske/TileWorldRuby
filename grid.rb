@@ -1,4 +1,4 @@
-require_relative "objects"
+require_relative 'objects'
 
 module Direction
   UP = 1
@@ -13,44 +13,38 @@ class Location
     @row = row
   end
 
-  def row
-    @row
-  end
+  attr_reader :row, :col
 
-  def col
-    @col
-  end
-
-  def nextLocation(dir)
-    if (dir == Direction::UP)
-      return Location.new(@col, @row - 1)
-    elsif (dir == Direction::DOWN)
-      return Location.new(@col, @row + 1)
-    elsif (dir == Direction::LEFT)
-      return Location.new(@col - 1, @row)
+  def next_location(dir)
+    if dir == Direction::UP
+      Location.new(@col, @row - 1)
+    elsif dir == Direction::DOWN
+      Location.new(@col, @row + 1)
+    elsif dir == Direction::LEFT
+      Location.new(@col - 1, @row)
     else
-      return Location.new(@col + 1, @row)
+      Location.new(@col + 1, @row)
     end
   end
 
   def equal?(other)
-    return @col == other.col && @row == other.row
+    @col == other.col && @row == other.row
   end
 
   def ==(other)
-    return @col == other.col && @row == other.row
+    @col == other.col && @row == other.row
   end
 
   def eql?(other)
-    return @col == other.col && @row == other.row
+    @col == other.col && @row == other.row
   end
 
   def hash
-    return @col << 8 & @row.hash
+    @col << 8 & @row.hash
   end
 
   def distance(other)
-    return (self.col - other.col).abs + (self.row - other.row).abs
+    (col - other.col).abs + (row - other.row).abs
   end
 
   def to_s
@@ -58,36 +52,37 @@ class Location
   end
 end
 
+# Grid class -> keeps the grid & pointers to all objects
 class Grid
   attr_reader :agents
 
-  def initialize(numAgents = 0, numHoles = 0, numTiles = 0, numObstacles = 0)
-    @numAgents = numAgents
-    @numHoles = numHoles
-    @numTiles = numTiles
-    @numObstacles = numObstacles
+  def initialize(num_agents = 0, num_holes = 0, num_tiles = 0, num_obstacles = 0)
+    @num_agents = num_agents
+    @num_holes = num_holes
+    @num_tiles = num_tiles
+    @num_obstacles = num_obstacles
 
     @agents = [] # array, as the number of agents stays fixed
-    @holes = Hash.new # hash because holes/tiles appear/disappear
-    @tiles = Hash.new
+    @holes = {} # hash because holes/tiles appear/disappear
+    @tiles = {}
     @obstacles = [] # also fixed
     @objects = Array.new(COLS) { Array.new(ROWS) { nil } }
   end
 
   def createObjects
-    for i in 0..(@numAgents - 1)
+    (0..(@num_agents - 1)).each do |i|
       location = randomFreeLocation
       agent = Agent.new(self, i, location)
       set_object(location, agent)
       @agents[i] = agent
     end
-    for i in 0..(@numHoles - 1)
+    (0..(@num_holes - 1)).each do |i|
       createHole(i)
     end
-    for i in 0..(@numTiles - 1)
+    (0..(@num_tiles - 1)).each do |i|
       createTile(i)
     end
-    for i in 0..(@numObstacles - 1)
+    (0..(@num_obstacles - 1)).each do |i|
       location = randomFreeLocation
       obst = Obstacle.new(i, location)
       set_object(location, obst)
@@ -96,13 +91,10 @@ class Grid
   end
 
   def object(location)
-    if location.col > COLS - 1 || location.col < 0
-      raise "Alles kapot: column out of range: #{location.col}"
-    end
-    if location.row > ROWS - 1 || location.row < 0
-      raise "Alles kapot: row out of range: #{location.row}"
-    end
-    return @objects[location.col][location.row]
+    raise "Alles kapot: column out of range: #{location.col}" if location.col > COLS - 1 || location.col < 0
+    raise "Alles kapot: row out of range: #{location.row}" if location.row > ROWS - 1 || location.row < 0
+
+    @objects[location.col][location.row]
   end
 
   def set_object(location, o)
@@ -137,7 +129,7 @@ class Grid
   end
 
   def validLocation(location)
-    return location.row >= 0 && location.row < ROWS && location.col >= 0 && location.col < COLS
+    location.row >= 0 && location.row < ROWS && location.col >= 0 && location.col < COLS
   end
 
   def freeLocation(location)
@@ -148,42 +140,42 @@ class Grid
     col = rand(0..COLS - 1)
     row = rand(0..ROWS - 1)
     location = Location.new(col, row)
-    while object(location) != nil
+    until object(location).nil?
       col = rand(0..COLS - 1)
       row = rand(0..ROWS - 1)
       location = Location.new(col, row)
     end
-    return location
+    location
   end
 
   def getClosestTile(location)
-    closest = 1000000
+    closest = 1_000_000
     best = nil
-    @tiles.each_value { |t|
+    @tiles.each_value do |t|
       dist = location.distance(t.location)
       if dist < closest
         closest = dist
         best = t
       end
-    }
-    return best
+    end
+    best
   end
 
   def getClosestHole(location)
-    closest = 1000000
+    closest = 1_000_000
     best = nil
-    @holes.each_value { |h|
+    @holes.each_value do |h|
       dist = location.distance(h.location)
       if dist < closest
         closest = dist
         best = h
       end
-    }
-    return best
+    end
+    best
   end
 
   def update
-    @agents.each() { |a|
+    @agents.each do |a|
       puts a
       origLocation = a.location
       a.update
@@ -191,40 +183,40 @@ class Grid
       newLocation = a.location
       set_object(origLocation, nil)
       set_object(newLocation, a)
-    }
+    end
   end
 
   def printGrid
-    print "  "
-    for c in 0..(COLS - 1)
-      printf "%d", c % 10
+    print '  '
+    (0..(COLS - 1)).each do |c|
+      printf '%d', c % 10
     end
-    for r in 0..(ROWS - 1)
+    (0..(ROWS - 1)).each do |r|
       puts
-      printf "%02d", r
-      for c in 0..(COLS - 1)
+      printf '%02d', r
+      (0..(COLS - 1)).each do |c|
         location = Location.new(c, r)
         o = object(location)
-        if o != nil
+        if !o.nil?
           if o.instance_of? Agent
-            print "A"
+            print 'A'
           elsif o.instance_of? Hole
-            print "H"
+            print 'H'
           elsif o.instance_of? Tile
-            print "T"
+            print 'T'
           elsif o.instance_of? Obstacle
-            print "#"
+            print '#'
           end
         else
-          print "."
+          print '.'
         end
       end
     end
     puts
-    @agents.each { |a|
+    @agents.each do |a|
       id = a.num
       text = "Agent(#{id}): #{a.score}"
       puts text
-    }
+    end
   end
 end

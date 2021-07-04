@@ -41,33 +41,35 @@ def astar(grid, from, to)
       # arrived
       return current.path
     end
+
     closed_list.add(current)
-    checkNeighbor(grid, open_list, open_set, closed_list, current, Direction::UP, from, to)
-    checkNeighbor(grid, open_list, open_set, closed_list, current, Direction::DOWN, from, to)
-    checkNeighbor(grid, open_list, open_set, closed_list, current, Direction::LEFT, from, to)
-    checkNeighbor(grid, open_list, open_set, closed_list, current, Direction::RIGHT, from, to)
+    check_neighbor(grid, open_list, open_set, closed_list, current, Direction::UP, from, to)
+    check_neighbor(grid, open_list, open_set, closed_list, current, Direction::DOWN, from, to)
+    check_neighbor(grid, open_list, open_set, closed_list, current, Direction::LEFT, from, to)
+    check_neighbor(grid, open_list, open_set, closed_list, current, Direction::RIGHT, from, to)
   end
-  return []
+  []
 end
 
-def checkNeighbor(grid, open_list, open_set, closed_list, current, direction, from, to)
+def check_neighbor(grid, open_list, open_set, closed_list, current, direction, from, to)
   puts "check #{direction}"
-  nextLocation = current.location.nextLocation(direction)
-  if grid.freeLocation(nextLocation) || nextLocation.equal?(to)
-    h = nextLocation.distance(to)
-    g = current.location.distance(from) + 1
-    path = []
-    path.append(*current.path).append(nextLocation)
-    child = Node.new(nextLocation, path, g + h)
-    unless closed_list.include?(child)
-      better = open_set.filter do |n|
-        n.location.equal?(child.location) && n.score < child.score
-      end
-      if better.empty?
-        puts "adding child #{child}"
-        open_list.push(child, child.score)
-        open_set.add(child)
-      end
-    end
+  next_location = current.location.next_location(direction)
+  return unless grid.freeLocation(next_location) || next_location.equal?(to)
+
+  h = next_location.distance(to)
+  g = current.location.distance(from) + 1
+  path = []
+  path.append(*current.path).append(next_location)
+  child = Node.new(next_location, path, g + h)
+
+  return if closed_list.include?(child)
+
+  better = open_set.filter do |n|
+    n.location.equal?(child.location) && n.score < child.score
   end
+  return unless better.empty?
+
+  puts "adding child #{child}"
+  open_list.push(child, child.score)
+  open_set.add(child)
 end

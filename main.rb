@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 
-require_relative "grid"
-require_relative "gridview"
-require_relative "objects"
+require_relative 'grid'
+require_relative 'gridview'
+require_relative 'objects'
 
 ROWS = 40
 COLS = 40
