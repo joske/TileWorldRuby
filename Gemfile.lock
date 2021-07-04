@@ -1,0 +1,54 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    algorithms (1.0.0)
+    atk (3.4.4)
+      glib2 (= 3.4.4)
+    cairo (1.17.5)
+      native-package-installer (>= 1.0.3)
+      pkg-config (>= 1.2.2)
+      red-colors
+    cairo-gobject (3.4.4)
+      cairo (>= 1.16.2)
+      glib2 (= 3.4.4)
+    gdk3 (3.4.4)
+      cairo-gobject (= 3.4.4)
+      gdk_pixbuf2 (= 3.4.4)
+      pango (= 3.4.4)
+    gdk_pixbuf2 (3.4.4)
+      gio2 (= 3.4.4)
+    gio2 (3.4.4)
+      gobject-introspection (= 3.4.4)
+    glib2 (3.4.4)
+      native-package-installer (>= 1.0.3)
+      pkg-config (>= 1.3.5)
+    gobject-introspection (3.4.4)
+      glib2 (= 3.4.4)
+    gtk3 (3.4.4)
+      atk (= 3.4.4)
+      gdk3 (= 3.4.4)
+      gdk_pixbuf2 (= 3.4.4)
+      gio2 (= 3.4.4)
+      pango (= 3.4.4)
+    matrix (0.4.2)
+    native-package-installer (1.1.1)
+    pango (3.4.4)
+      cairo-gobject (= 3.4.4)
+      gobject-introspection (= 3.4.4)
+    pkg-config (1.4.6)
+    rake (13.0.3)
+    red-colors (0.3.0)
+      matrix
+    ruby-debug-ide (0.7.2)
+      rake (>= 0.8.1)
+
+PLATFORMS
+  universal-darwin-20
+
+DEPENDENCIES
+  algorithms
+  gtk3
+  ruby-debug-ide
+
+BUNDLED WITH
+   2.2.21
