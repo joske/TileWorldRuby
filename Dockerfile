@@ -8,6 +8,6 @@ RUN apt update
 
 RUN bundle install
 
-COPY . .
+COPY *.rb ./
 
 CMD ["./main.rb"]
