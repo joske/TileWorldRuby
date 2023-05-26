@@ -43,10 +43,11 @@ def astar(grid, from, to)
     end
 
     closed_list.add(current)
-    Direction.constants.each do |d|
-      puts "checking direction #{d}"
-      check_neighbor(grid, open_list, open_set, closed_list, current, d, from, to)
-    end
+    check_neighbor(grid, open_list, open_set, closed_list, current, Direction::UP, from, to)
+    check_neighbor(grid, open_list, open_set, closed_list, current, Direction::DOWN, from, to)
+    check_neighbor(grid, open_list, open_set, closed_list, current, Direction::LEFT, from, to)
+    check_neighbor(grid, open_list, open_set, closed_list, current, Direction::DOWN, from, to)
+    check_neighbor(grid, open_list, open_set, closed_list, current, Direction::RIGHT, from, to)
   end
   []
 end
