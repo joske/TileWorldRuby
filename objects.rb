@@ -81,10 +81,10 @@ class Agent < GridObject
     @tile = @grid.getClosestTile(@location)
     path = astar(@grid, @location, @tile.location)
     puts "#{self} path: #{@path}"
-    unless path.empty?
-      next_loc = path.shift
-      nextMove(next_loc) if @grid.freeLocation(next_loc) || next_loc.equal?(@tile.location)
-    end
+    return if path.empty?
+
+    next_loc = path.shift
+    nextMove(next_loc) if @grid.freeLocation(next_loc) || next_loc.equal?(@tile.location)
   end
 
   def pick_tile
@@ -105,10 +105,10 @@ class Agent < GridObject
     path = astar(@grid, location, @hole.location)
     puts "#{self} path: #{@path}"
 
-    unless path.empty?
-      next_loc = path.shift
-      nextMove(next_loc) if @grid.freeLocation(next_loc) || next_loc.equal?(@hole.location)
-    end
+    return if path.empty?
+
+    next_loc = path.shift
+    nextMove(next_loc) if @grid.freeLocation(next_loc) || next_loc.equal?(@hole.location)
   end
 
   def dump_tile

@@ -31,9 +31,9 @@ def astar(grid, from, to)
   end
   open_set = Set.new
   closed_list = Set.new
-  fromNode = Node.new(from, nil, 0)
-  open_list.push(fromNode, 0)
-  open_set.add(fromNode)
+  from_node = Node.new(from, nil, 0)
+  open_list.push(from_node, 0)
+  open_set.add(from_node)
   until open_list.empty?
     current = open_list.pop
     puts "current=#{current}"
@@ -43,10 +43,10 @@ def astar(grid, from, to)
     end
 
     closed_list.add(current)
-    check_neighbor(grid, open_list, open_set, closed_list, current, Direction::UP, from, to)
-    check_neighbor(grid, open_list, open_set, closed_list, current, Direction::DOWN, from, to)
-    check_neighbor(grid, open_list, open_set, closed_list, current, Direction::LEFT, from, to)
-    check_neighbor(grid, open_list, open_set, closed_list, current, Direction::RIGHT, from, to)
+    Direction.constants.each do |d|
+      puts "checking direction #{d}"
+      check_neighbor(grid, open_list, open_set, closed_list, current, d, from, to)
+    end
   end
   []
 end

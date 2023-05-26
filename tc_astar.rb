@@ -29,11 +29,13 @@ class TestPath < Test::Unit::TestCase
     grid = Grid.new
     from = Location.new(0, 0)
     to = Location.new(4, 4)
-    obstacles = [Obstacle.new(0, Location.new(0, 1)), Obstacle.new(1, Location.new(1, 1)),
-                 Obstacle.new(2, Location.new(2, 1)), Obstacle.new(3, Location.new(3, 1))]
-    obstacles.each do |obst|
-      grid.set_object(obst.location, obst)
-    end
+    obstacles = [
+      Obstacle.new(0, Location.new(0, 1)),
+      Obstacle.new(1, Location.new(1, 1)),
+      Obstacle.new(2, Location.new(2, 1)),
+      Obstacle.new(3, Location.new(3, 1))
+    ]
+    obstacles.each { |obst| grid.set_object(obst.location, obst) }
     path = astar(grid, from, to)
     puts "from #{from} to #{to} : #{path}"
     assert_equal(8, path.size)
@@ -56,12 +58,14 @@ class TestPath < Test::Unit::TestCase
     grid = Grid.new
     from = Location.new(0, 0)
     to = Location.new(4, 4)
-    obstacles = [Obstacle.new(0, Location.new(0, 1)), Obstacle.new(1, Location.new(1, 1)),
-                 Obstacle.new(2, Location.new(2, 1)), Obstacle.new(3, Location.new(3, 1)), 
-                 Obstacle.new(4, Location.new(4, 1))]
-    obstacles.each do |obst|
-      grid.set_object(obst.location, obst)
-    end
+    obstacles = [
+      Obstacle.new(0, Location.new(0, 1)),
+      Obstacle.new(1, Location.new(1, 1)),
+      Obstacle.new(2, Location.new(2, 1)),
+      Obstacle.new(3, Location.new(3, 1)),
+      Obstacle.new(4, Location.new(4, 1))
+    ]
+    obstacles.each { |obst| grid.set_object(obst.location, obst) }
     path = astar(grid, from, to)
     puts "from #{from} to #{to} : #{path}"
     assert_equal(0, path.size) # can not reach goal
