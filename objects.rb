@@ -46,7 +46,7 @@ class Agent < GridObject
   end
 
   # updates the location of this agent
-  def nextMove(location)
+  def next_move(location)
     puts "move #{location}"
     @location = location
   end
@@ -66,7 +66,7 @@ class Agent < GridObject
     @hole = nil
     @has_tile = false
     puts "#{self} finding tile"
-    @tile = @grid.getClosestTile(@location)
+    @tile = @grid.get_closest_tile(@location)
     puts "#{self} found tile #{@tile}"
     @state = State::MOVE_TO_TILE
   end
@@ -78,20 +78,20 @@ class Agent < GridObject
       return
     end
     # try to find a closer tile
-    @tile = @grid.getClosestTile(@location)
+    @tile = @grid.get_closest_tile(@location)
     path = astar(@grid, @location, @tile.location)
     puts "#{self} path: #{@path}"
     return if path.empty?
 
     next_loc = path.shift
-    nextMove(next_loc) if @grid.freeLocation(next_loc) || next_loc.equal?(@tile.location)
+    next_move(next_loc) if @grid.free_location(next_loc) || next_loc.equal?(@tile.location)
   end
 
   def pick_tile
     puts "agent #{@num}: pick_tile"
     @has_tile = true
-    @grid.removeTile(@tile)
-    @hole = @grid.getClosestHole(@location)
+    @grid.remove_tile(@tile)
+    @hole = @grid.get_closest_hole(@location)
     @state = State::MOVE_TO_HOLE
   end
 
@@ -101,14 +101,14 @@ class Agent < GridObject
       dump_tile
       return
     end
-    @hole = @grid.getClosestHole(@location)
+    @hole = @grid.get_closest_hole(@location)
     path = astar(@grid, location, @hole.location)
     puts "#{self} path: #{@path}"
 
     return if path.empty?
 
     next_loc = path.shift
-    nextMove(next_loc) if @grid.freeLocation(next_loc) || next_loc.equal?(@hole.location)
+    next_move(next_loc) if @grid.free_location(next_loc) || next_loc.equal?(@hole.location)
   end
 
   def dump_tile
@@ -116,9 +116,9 @@ class Agent < GridObject
     @score += @tile.score
     @tile = nil
     @has_tile = false
-    @grid.removeHole(@hole)
+    @grid.remove_hole(@hole)
     @hole = nil
-    @tile = @grid.getClosestTile(@location)
+    @tile = @grid.get_closest_tile(@location)
     puts "#{self} found tile #{@tile}"
     @state = State::MOVE_TO_TILE
   end

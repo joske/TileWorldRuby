@@ -69,7 +69,7 @@ class Grid
     @objects = Array.new(COLS) { Array.new(ROWS) { nil } }
   end
 
-  def createObjects
+  def create_objects
     (0..(@num_agents - 1)).each do |i|
       location = random_free_location
       agent = Agent.new(self, i, location)
@@ -77,10 +77,10 @@ class Grid
       @agents[i] = agent
     end
     (0..(@num_holes - 1)).each do |i|
-      createHole(i)
+      create_hole(i)
     end
     (0..(@num_tiles - 1)).each do |i|
-      createTile(i)
+      create_tile(i)
     end
     (0..(@num_obstacles - 1)).each do |i|
       location = random_free_location
@@ -101,7 +101,7 @@ class Grid
     @objects[location.col][location.row] = o
   end
 
-  def createTile(num)
+  def create_tile(num)
     score = rand(1..6)
     location = random_free_location
     tile = Tile.new(num, location, score)
@@ -109,31 +109,31 @@ class Grid
     @tiles[num] = tile
   end
 
-  def createHole(num)
+  def create_hole(num)
     location = random_free_location
     hole = Hole.new(num, location)
     set_object(location, hole)
     @holes[num] = hole
   end
 
-  def removeTile(tile)
+  def remove_tile(tile)
     @tiles.delete(tile)
     set_object(tile.location, nil)
-    createTile(tile.num)
+    create_tile(tile.num)
   end
 
-  def removeHole(hole)
+  def remove_hole(hole)
     @holes.delete(hole)
     set_object(hole.location, nil)
-    createHole(hole.num)
+    create_hole(hole.num)
   end
 
-  def validLocation(location)
+  def valid_location(location)
     location.row >= 0 && location.row < ROWS && location.col >= 0 && location.col < COLS
   end
 
-  def freeLocation(location)
-    validLocation(location) && object(location).nil?
+  def free_location(location)
+    valid_location(location) && object(location).nil?
   end
 
   def random_free_location
@@ -148,7 +148,7 @@ class Grid
     location
   end
 
-  def getClosestTile(location)
+  def get_closest_tile(location)
     closest = 1_000_000
     best = nil
     @tiles.each_value do |t|
@@ -161,7 +161,7 @@ class Grid
     best
   end
 
-  def getClosestHole(location)
+  def get_closest_hole(location)
     closest = 1_000_000
     best = nil
     @holes.each_value do |h|

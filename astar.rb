@@ -46,7 +46,6 @@ def astar(grid, from, to)
     check_neighbor(grid, open_list, open_set, closed_list, current, Direction::UP, from, to)
     check_neighbor(grid, open_list, open_set, closed_list, current, Direction::DOWN, from, to)
     check_neighbor(grid, open_list, open_set, closed_list, current, Direction::LEFT, from, to)
-    check_neighbor(grid, open_list, open_set, closed_list, current, Direction::DOWN, from, to)
     check_neighbor(grid, open_list, open_set, closed_list, current, Direction::RIGHT, from, to)
   end
   []
@@ -55,7 +54,7 @@ end
 def check_neighbor(grid, open_list, open_set, closed_list, current, direction, from, to)
   puts "check #{direction}"
   next_location = current.location.next_location(direction)
-  return unless grid.freeLocation(next_location) || next_location.equal?(to)
+  return unless grid.free_location(next_location) || next_location.equal?(to)
 
   h = next_location.distance(to)
   g = current.location.distance(from) + 1

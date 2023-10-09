@@ -10,6 +10,6 @@ MAG = 20
 TIMEOUT = 200
 
 grid = Grid.new(6, 20, 20, 40)
-grid.createObjects
+grid.create_objects
 app = TileWorld.new(grid)
 app.run
